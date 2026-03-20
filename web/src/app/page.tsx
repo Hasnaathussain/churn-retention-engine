@@ -1,31 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
-  BarChart, Bar, Legend, PieChart, Pie, Cell
+  PieChart, Pie, Cell
 } from "recharts";
 import { 
-  Activity, Users, DollarSign, AlertTriangle, ShieldCheck, 
-  Mail, Tag, PhoneCall, PlayCircle, X, Sparkles, BrainCircuit,
-  TrendingDown, TrendingUp, ArrowRight
+  Mail, Tag, PhoneCall, X, Sparkles, BrainCircuit,
+  TrendingDown, TrendingUp, ArrowRight, DollarSign, Users, Activity, PlayCircle, AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import "./synapse.css";
 
-// --- Mock Data for Charts & Tables ---
+// --- Mock Data ---
 const revenueData = [
-  { name: "Jan", mrr: 120000, churned: 4000 },
-  { name: "Feb", mrr: 125000, churned: 3500 },
-  { name: "Mar", mrr: 132000, churned: 5200 },
-  { name: "Apr", mrr: 141000, churned: 2100 },
-  { name: "May", mrr: 145200, churned: 1800 },
-  { name: "Jun", mrr: 156000, churned: 1500 },
+  { name: "Jan", mrr: 118000, churned: 5200 },
+  { name: "Feb", mrr: 128000, churned: 6100 },
+  { name: "Mar", mrr: 135000, churned: 5800 },
+  { name: "Apr", mrr: 140000, churned: 3200 },
+  { name: "May", mrr: 148000, churned: 2100 },
+  { name: "Jun", mrr: 156000, churned: 1600 },
 ];
 
 const riskDistribution = [
-  { name: "Low Risk", value: 75, color: "#10B981" },
-  { name: "Medium Risk", value: 15, color: "#F59E0B" },
-  { name: "High Risk", value: 10, color: "#EF4444" },
+  { name: "High Risk", value: 23, color: "#e87070" },
+  { name: "Medium Risk", value: 34, color: "#f0b040" },
+  { name: "Low Risk", value: 43, color: "#4acc80" },
 ];
 
 const mockCustomers = [
@@ -42,413 +42,376 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<any>(null);
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
-  const [showIntro, setShowIntro] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const testPrediction = async () => {
+  // --- Background Star Animation ---
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    let stars: any[] = [];
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+
+    const resize = () => {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      initStars();
+    };
+
+    const initStars = () => {
+      stars = [];
+      const n = Math.floor(W * H / 4200);
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H * 0.8,
+          r: Math.random() * 1.2 + 0.2,
+          alpha: Math.random() * 0.65 + 0.1,
+          sp: Math.random() * 0.003 + 0.001,
+          ph: Math.random() * Math.PI * 2
+        });
+      }
+    };
+
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, W, H);
+      stars.forEach(s => {
+        const a = s.alpha * (0.6 + 0.4 * Math.sin(t * 0.001 * s.sp * 1000 + s.ph));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(220, 230, 255, ${a})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    };
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(draw);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  const handlePredict = async () => {
     setLoading(true);
     setPrediction(null);
     try {
-      // Calling the live Render backend
       const response = await fetch("https://churn-retention-engine.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer_id: "cust_live_demo",
-          mrr: 45.0,
-          usage_frequency: 2,
-          support_tickets: 4,
-          last_login_days_ago: 20,
-          plan_tier: "pro"
+          customer_id: "demo_user_live",
+          mrr: 499.0,
+          usage_frequency: 3,
+          support_tickets: 5,
+          last_login_days_ago: 18,
+          plan_tier: "enterprise"
         })
       });
       const data = await response.json();
-      
-      // Simulate network delay for UI effect
       setTimeout(() => {
         setPrediction(data);
         setLoading(false);
-      }, 800);
-
+        document.getElementById('live-intelligence')?.scrollIntoView({ behavior: 'smooth' });
+      }, 1000);
     } catch (error) {
-      console.error(error);
-      alert("Failed to connect to backend. Ensure it is running.");
+      alert("Backend error. Check console.");
       setLoading(false);
     }
   };
 
-  const getActionBadge = (status: string) => {
-    switch (status) {
-      case "founder_email": return <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30"><Mail size={12}/> Founder Email</span>;
-      case "discount_offer": return <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-300 border border-green-500/30"><Tag size={12}/> 20% Discount</span>;
-      case "success_call": return <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30"><PhoneCall size={12}/> Success Call</span>;
-      case "automated_email": return <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-300 border border-gray-500/30"><Mail size={12}/> Auto Email</span>;
-      default: return <span className="text-gray-500 text-xs">Monitoring</span>;
+  const handleCheckout = async () => {
+    try {
+      const response = await fetch("https://churn-retention-engine.onrender.com/create-checkout-session", {
+        method: "POST"
+      });
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      alert("Monetization gateway error. Check API keys.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
-      {/* Dynamic Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 blur-[120px] rounded-full mix-blend-screen"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full mix-blend-screen"></div>
-      </div>
+    <div className="synapse-body min-h-screen relative overflow-x-hidden">
+      <canvas ref={canvasRef} className="star-canvas" />
 
-      <div className="relative z-10 max-w-7xl mx-auto p-6 md:p-10 space-y-10">
-        
-        {/* Navigation / Header */}
-        <nav className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <BrainCircuit className="text-white w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                Synapse <span className="text-sm font-normal px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Enterprise</span>
-              </h1>
-              <p className="text-sm text-gray-400">AI-Powered Churn Prediction & Retention</p>
-            </div>
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-12 py-5 backdrop-blur-md bg-[#080d1a]/60 border-b border-[#d4902a]/10">
+        <div className="nav-brand-font text-[22px] flex items-center gap-3 text-[#f0e8d8]">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="11" r="10" stroke="rgba(212,144,42,0.6)" strokeWidth="1"/>
+            <path d="M6 11 Q11 4 16 11 Q11 18 6 11Z" fill="rgba(212,144,42,0.3)" stroke="rgba(212,144,42,0.7)" strokeWidth="0.8"/>
+            <circle cx="11" cy="11" r="2.5" fill="#f0b040"/>
+          </svg>
+          Synapse<sup className="text-[10px] text-[#d4902a] ml-1">®</sup>
+          <span className="font-sans text-[10px] tracking-[0.12em] uppercase text-[#d4902a] border border-[#d4902a]/30 rounded-full px-2.5 py-0.5 ml-2">Enterprise</span>
+        </div>
+        <ul className="hidden lg:flex gap-9 text-[13px] tracking-[0.05em] text-[#6b7fa0]">
+          <li className="hover:text-[#e8c57a] cursor-pointer transition-colors">Overview</li>
+          <li className="hover:text-[#e8c57a] cursor-pointer transition-colors">Intelligence</li>
+          <li className="hover:text-[#e8c57a] cursor-pointer transition-colors">Campaigns</li>
+          <li className="hover:text-[#e8c57a] cursor-pointer transition-colors">Settings</li>
+        </ul>
+        <button onClick={handlePredict} className="text-[13px] text-[#f0b040] border border-[#d4902a]/40 rounded-full px-5 py-2 hover:bg-[#d4902a]/10 transition-all flex items-center gap-2">
+           <Activity size={14} className={loading ? "animate-spin" : ""} />
+           {loading ? "Analyzing..." : "Run Live AI Prediction"}
+        </button>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 min-h-screen flex flex-col items-center justify-center text-center px-6 pt-[120px] pb-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          className="text-[11px] tracking-[0.2em] uppercase text-[#d4902a] mb-7"
+        >
+          AI-Powered Churn Prediction & Retention
+        </motion.div>
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+          className="hero-title-font text-[52px] md:text-[88px] font-light leading-[1.05] text-[#f0e8d8] max-w-[900px] mb-7"
+        >
+          Where <em className="italic text-[#e8c57a]">revenue</em> survives<br />through the signals.
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+          className="text-[15px] text-[#8899bb] max-w-[520px] leading-[1.8] mb-12"
+        >
+          We built an autonomous intelligence engine for SaaS teams. It watches your customers so you don't have to — and acts before they leave.
+        </motion.p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+          className="flex gap-4"
+        >
+          <button onClick={handleCheckout} className="btn-synapse-primary px-9 py-3.5 rounded-full text-[14px] font-normal tracking-[0.05em] shadow-lg">Begin Intelligence</button>
+          <button className="btn-synapse-ghost px-9 py-3.5 rounded-full text-[14px] font-normal tracking-[0.05em]">View Documentation</button>
+        </motion.div>
+      </section>
+
+      {/* How it Works Card */}
+      <section className="relative z-10 max-w-[900px] mx-auto px-6 mb-20">
+        <div className="glass-card rounded-[16px] p-10 md:p-11">
+          <h2 className="hero-title-font text-[28px] text-[#f0e8d8] mb-4">How the Machine Thinks</h2>
+          <p className="text-[14px] leading-[1.85] text-[#8899bb] mb-8 max-w-[680px]">
+            This platform acts as an autonomous Customer Success Manager. It connects directly to your <strong>Stripe</strong> and <strong>Mixpanel</strong> data. 
+            When it detects a high churn risk pattern, it leverages <strong>GPT-4o</strong> to generate and deploy personalized retention campaigns — before the user even clicks "Cancel."
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             {[
+               { icon: "∿", title: "Monitor", desc: "Ingests live usage and billing events, building behavioral fingerprints.", color: "#f0b040" },
+               { icon: "△", title: "Predict", desc: "ML models flag at-risk accounts up to 30 days before churn.", color: "#e06060" },
+               { icon: "◇", title: "Retain", desc: "Auto-triggers AI emails, discount offers, and success calls.", color: "#4acc80" }
+             ].map((step, i) => (
+               <div key={i} className="bg-[#162035]/80 border border-[#6b7fa0]/15 rounded-[10px] p-5 hover:border-[#d4902a]/25 transition-colors">
+                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-medium mb-3 border" style={{ backgroundColor: `${step.color}20`, color: step.color, borderColor: `${step.color}50` }}>{step.icon}</div>
+                 <h3 className="hero-title-font text-[17px] text-[#f0e8d8] mb-1.5">{step.title}</h3>
+                 <p className="text-[12.5px] text-[#6b7fa0] leading-[1.6]">{step.desc}</p>
+               </div>
+             ))}
           </div>
-          <div className="flex items-center gap-4">
-            <a href="https://github.com/Hasnaathussain/churn-retention-engine" target="_blank" rel="noreferrer" className="text-sm text-gray-400 hover:text-white transition-colors">Documentation</a>
-            <button 
-              onClick={testPrediction}
-              disabled={loading}
-              className="group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/40 to-purple-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <Sparkles size={16} className={loading ? "animate-spin" : ""} />
-              {loading ? "Analyzing Live Data..." : "Run Live AI Prediction"}
-            </button>
-          </div>
-        </nav>
+        </div>
+      </section>
 
-        {/* Explainer / Intro Section */}
-        <AnimatePresence>
-          {showIntro && (
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0, overflow: "hidden", marginTop: 0, marginBottom: 0 }}
-              className="relative p-8 rounded-3xl bg-gradient-to-br from-indigo-900/40 to-purple-900/20 border border-white/10 backdrop-blur-xl shadow-2xl"
-            >
-              <button onClick={() => setShowIntro(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                <X size={20} />
-              </button>
-              <div className="max-w-3xl">
-                <h2 className="text-2xl font-bold text-white mb-3">How this Machine Works 🧠</h2>
-                <p className="text-gray-300 mb-6 leading-relaxed">
-                  This platform acts as an autonomous Customer Success Manager. It connects directly to your <strong>Stripe</strong> (billing) and <strong>Mixpanel</strong> (usage) data. 
-                  A predictive Machine Learning engine analyzes user behavior 24/7. When it detects a pattern indicating high churn risk (e.g., dropping usage + open support tickets), 
-                  it leverages <strong>GPT-4o</strong> to instantly generate and deploy highly personalized retention campaigns before the user even clicks "Cancel".
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-black/20 p-4 rounded-xl border border-white/5 flex items-start gap-3">
-                    <Activity className="text-indigo-400 w-6 h-6 mt-1" />
-                    <div><h4 className="font-semibold text-gray-200">1. Monitor</h4><p className="text-xs text-gray-400">Ingests live usage and billing events.</p></div>
-                  </div>
-                  <div className="bg-black/20 p-4 rounded-xl border border-white/5 flex items-start gap-3">
-                    <AlertTriangle className="text-amber-400 w-6 h-6 mt-1" />
-                    <div><h4 className="font-semibold text-gray-200">2. Predict</h4><p className="text-xs text-gray-400">ML models flag at-risk accounts 30 days out.</p></div>
-                  </div>
-                  <div className="bg-black/20 p-4 rounded-xl border border-white/5 flex items-start gap-3">
-                    <ShieldCheck className="text-green-400 w-6 h-6 mt-1" />
-                    <div><h4 className="font-semibold text-gray-200">3. Retain</h4><p className="text-xs text-gray-400">Auto-triggers AI emails & discount offers.</p></div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* Dashboard Section */}
+      <section id="live-intelligence" className="relative z-10 max-w-[1200px] mx-auto px-6 pb-[120px]">
+        <div className="flex items-center gap-4 text-[11px] tracking-[0.2em] uppercase text-[#d4902a] mb-12">
+          Live Intelligence Dashboard
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-[#d4902a]/20 to-transparent"></div>
+        </div>
 
-        {/* Live Prediction Results */}
-        <AnimatePresence>
-          {prediction && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-gray-900/60 backdrop-blur-xl border border-indigo-500/30 rounded-3xl p-8 shadow-[0_0_40px_-10px_rgba(99,102,241,0.2)]"
-            >
+        {prediction && (
+           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-2xl p-8 mb-8 border-[#d4902a]/30">
               <div className="flex flex-col md:flex-row gap-8 items-center">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="flex h-3 w-3 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                    </span>
-                    <h3 className="text-indigo-400 font-semibold tracking-wide uppercase text-sm">Live AI Assessment Complete</h3>
-                  </div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Customer: {prediction.customer_id}</h2>
-                  <p className="text-gray-400 mb-6">Based on their recent activity drop-off and support ticket volume, our engine has calculated their immediate risk profile.</p>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-black/30 p-4 rounded-2xl border border-white/5">
-                      <p className="text-sm text-gray-400 mb-1">Recommended Action</p>
-                      <p className="font-semibold text-indigo-300">Generate GPT-4o Email</p>
+                 <div className="flex-1">
+                    <h3 className="text-[#d4902a] text-xs tracking-widest uppercase mb-2">Live Analysis Complete</h3>
+                    <h2 className="hero-title-font text-3xl text-[#f0e8d8] mb-4">Target: {prediction.customer_id}</h2>
+                    <div className="bg-black/20 rounded-xl p-4 border border-white/5 text-sm text-[#8899bb]">
+                       Our GPT-4o agent recommends: <span className="text-[#e8c57a] font-medium">Automatic Discount Retention Campaign</span>
                     </div>
-                    <div className="bg-black/30 p-4 rounded-2xl border border-white/5">
-                      <p className="text-sm text-gray-400 mb-1">Target</p>
-                      <p className="font-semibold text-gray-200">Re-engage with premium features</p>
+                 </div>
+                 <div className="relative w-48 h-48 flex items-center justify-center">
+                    <svg className="absolute inset-0 w-full h-full -rotate-90">
+                       <circle cx="50%" cy="50%" r="42%" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                       <motion.circle 
+                          initial={{ pathLength: 0 }} animate={{ pathLength: prediction.churn_probability }} transition={{ duration: 1.5 }}
+                          cx="50%" cy="50%" r="42%" fill="none" stroke={prediction.is_at_risk ? "#e87070" : "#4acc80"} strokeWidth="4" strokeLinecap="round"
+                       />
+                    </svg>
+                    <div className="text-center">
+                       <div className={`text-4xl font-light hero-title-font ${prediction.is_at_risk ? "text-[#e87070]" : "text-[#4acc80]"}`}>{(prediction.churn_probability * 100).toFixed(0)}%</div>
+                       <div className="text-[10px] uppercase tracking-tighter text-[#6b7fa0]">Churn Risk</div>
                     </div>
-                  </div>
-                </div>
+                 </div>
+              </div>
+           </motion.div>
+        )}
 
-                <div className="w-full md:w-auto bg-black/40 p-8 rounded-full border border-white/10 flex flex-col items-center justify-center aspect-square md:h-64 relative">
-                   <svg className="absolute inset-0 w-full h-full transform -rotate-90">
-                     <circle cx="50%" cy="50%" r="45%" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                     <motion.circle 
-                       initial={{ strokeDasharray: "0 1000" }}
-                       animate={{ strokeDasharray: `${prediction.churn_probability * 100}, 100` }}
-                       transition={{ duration: 1.5, ease: "easeOut" }}
-                       cx="50%" cy="50%" r="45%" fill="none" 
-                       stroke={prediction.is_at_risk ? "#EF4444" : "#10B981"} 
-                       strokeWidth="8" strokeLinecap="round" 
-                       pathLength="100"
-                     />
-                   </svg>
-                   <div className="text-center z-10">
-                     <span className={`text-5xl font-bold ${prediction.is_at_risk ? "text-red-400" : "text-green-400"}`}>
-                       {(prediction.churn_probability * 100).toFixed(1)}%
-                     </span>
-                     <p className="text-sm text-gray-400 mt-1 uppercase tracking-widest">Churn Risk</p>
+        {/* KPI Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+           {[
+             { label: "Total Monthly Revenue", val: "$156,000", color: "#6ee09a", icon: <TrendingUp size={16}/>, sub: "↑ 8.4% from last month" },
+             { label: "Revenue at Risk (30d)", val: "$24,500", color: "#e87070", icon: <AlertTriangle size={16}/>, sub: "Requires immediate action" },
+             { label: "Active Retentions", val: "142", color: "#f0e8d8", sub: "Customers saved this year" },
+             { label: "AI Campaigns Running", val: "18", color: "#f0b040", sub: "A/B testing 3 variations" }
+           ].map((kpi, i) => (
+             <div key={i} className="kpi-card-glass rounded-[12px] p-6 hover:translate-y-[-3px] hover:border-[#d4902a]/20 transition-all">
+                <div className="text-[11px] tracking-[0.1em] uppercase text-[#6b7fa0] mb-3.5">{kpi.label}</div>
+                <div className="hero-title-font text-[40px] font-light leading-none mb-2.5" style={{ color: kpi.color }}>{kpi.val}</div>
+                <div className="text-[12px] text-[#6b7fa0] flex items-center gap-1.5">
+                   {kpi.icon && <span style={{ color: kpi.color }}>{kpi.icon}</span>}
+                   {kpi.sub}
+                </div>
+             </div>
+           ))}
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+           <div className="lg:col-span-2 kpi-card-glass rounded-[12px] p-7">
+              <h3 className="hero-title-font text-xl text-[#f0e8d8] mb-1.5">Revenue & Churn Velocity</h3>
+              <p className="text-[12px] text-[#6b7fa0] mb-5">Monthly recurring revenue against churn pressure</p>
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                   <AreaChart data={revenueData}>
+                      <defs>
+                        <linearGradient id="colorMrr" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#5b8fe8" stopOpacity={0.1}/><stop offset="95%" stopColor="#5b8fe8" stopOpacity={0}/></linearGradient>
+                        <linearGradient id="colorChurn" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#e87070" stopOpacity={0.1}/><stop offset="95%" stopColor="#e87070" stopOpacity={0}/></linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff07" vertical={false} />
+                      <XAxis dataKey="name" stroke="#6b7fa0" fontSize={11} axisLine={false} tickLine={false} />
+                      <YAxis stroke="#6b7fa0" fontSize={11} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
+                      <RechartsTooltip contentStyle={{ backgroundColor: '#0d1526', borderColor: '#d4902a30', borderRadius: '8px' }} />
+                      <Area type="monotone" dataKey="mrr" stroke="#5b8fe8" fillOpacity={1} fill="url(#colorMrr)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="churned" stroke="#e87070" fillOpacity={1} fill="url(#colorChurn)" strokeWidth={2} />
+                   </AreaChart>
+                </ResponsiveContainer>
+              </div>
+           </div>
+           <div className="kpi-card-glass rounded-[12px] p-7 flex flex-col">
+              <h3 className="hero-title-font text-xl text-[#f0e8d8] mb-1.5">Portfolio Risk</h3>
+              <p className="text-[12px] text-[#6b7fa0] mb-5">Real-time breakdown by risk tier</p>
+              <div className="flex-1 min-h-[180px]">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                       <Pie data={riskDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                          {riskDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                       </Pie>
+                       <RechartsTooltip />
+                    </PieChart>
+                 </ResponsiveContainer>
+              </div>
+              <div className="space-y-3 mt-4">
+                 {riskDistribution.map((tier, i) => (
+                   <div key={i} className="flex justify-between items-center text-[13px]">
+                      <div className="flex items-center gap-2.5 text-[#8899bb]"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: tier.color }} />{tier.name}</div>
+                      <div className="text-[#f0e8d8]">{tier.value}%</div>
                    </div>
-                </div>
+                 ))}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Top KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-400">Total Monthly Revenue</p>
-                <h3 className="text-3xl font-bold text-white mt-1">$156,000</h3>
-              </div>
-              <div className="p-2 bg-green-500/20 rounded-lg text-green-400"><DollarSign size={20} /></div>
-            </div>
-            <p className="text-sm text-green-400 mt-4 flex items-center gap-1"><TrendingUp size={16}/> +8.4% from last month</p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-red-500/20 hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-red-400/80">Revenue at Risk (30d)</p>
-                <h3 className="text-3xl font-bold text-red-400 mt-1">$24,500</h3>
-              </div>
-              <div className="p-2 bg-red-500/20 rounded-lg text-red-400"><TrendingDown size={20} /></div>
-            </div>
-            <p className="text-sm text-red-400 mt-4 flex items-center gap-1"><AlertTriangle size={16}/> Requires immediate action</p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-400">Active Retentions</p>
-                <h3 className="text-3xl font-bold text-white mt-1">142</h3>
-              </div>
-              <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><Users size={20} /></div>
-            </div>
-            <p className="text-sm text-gray-400 mt-4">Customers saved this year</p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-400">AI Campaigns Running</p>
-                <h3 className="text-3xl font-bold text-white mt-1">18</h3>
-              </div>
-              <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400"><PlayCircle size={20} /></div>
-            </div>
-            <p className="text-sm text-gray-400 mt-4">A/B Testing 3 variations</p>
-          </div>
+           </div>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-6">Revenue & Churn Velocity</h3>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorMrr" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorChurn" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                  <XAxis dataKey="name" stroke="#ffffff50" axisLine={false} tickLine={false} />
-                  <YAxis yAxisId="left" stroke="#ffffff50" axisLine={false} tickLine={false} tickFormatter={(val) => `$${val/1000}k`} />
-                  <YAxis yAxisId="right" orientation="right" stroke="#ffffff50" axisLine={false} tickLine={false} tickFormatter={(val) => `$${val/1000}k`} />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', color: '#fff', borderRadius: '12px' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Legend verticalAlign="top" height={36}/>
-                  <Area yAxisId="left" type="monotone" dataKey="mrr" name="Total MRR" stroke="#6366F1" strokeWidth={3} fillOpacity={1} fill="url(#colorMrr)" />
-                  <Area yAxisId="right" type="monotone" dataKey="churned" name="Churned MRR" stroke="#EF4444" strokeWidth={3} fillOpacity={1} fill="url(#colorChurn)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+        {/* Pricing / Monetization Section */}
+        <div className="my-20 text-center">
+           <h2 className="hero-title-font text-[44px] text-[#f0e8d8] mb-4">Secure your revenue today.</h2>
+           <p className="text-[#6b7fa0] text-sm mb-10">Choose the enterprise plan to unlock full automated retention campaigns.</p>
+           <div className="max-w-[400px] mx-auto glass-card p-10 rounded-2xl border-[#d4902a]/40 shadow-2xl">
+              <div className="text-[11px] tracking-[0.2em] uppercase text-[#d4902a] mb-6">Annual Membership</div>
+              <div className="hero-title-font text-6xl text-[#f0e8d8] mb-2">$499<span className="text-xl text-[#6b7fa0]">/mo</span></div>
+              <p className="text-xs text-[#6b7fa0] mb-8">Billed annually. Full AI model access included.</p>
+              <button onClick={handleCheckout} className="btn-synapse-primary w-full py-4 rounded-full text-sm font-medium tracking-widest uppercase">Subscribe Now</button>
+           </div>
+        </div>
 
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col">
-            <h3 className="text-lg font-semibold text-white mb-2">Portfolio Risk Distribution</h3>
-            <p className="text-sm text-gray-400 mb-6">Real-time breakdown of your customer base.</p>
-            <div className="flex-1 flex items-center justify-center min-h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={riskDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {riskDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+        {/* Data Feed */}
+        <div className="feed-card rounded-[12px]">
+           <div className="flex justify-between items-start mb-7">
+              <div>
+                <h2 className="hero-title-font text-2xl text-[#f0e8d8]">Live Intelligence Feed</h2>
+                <p className="text-[12px] text-[#6b7fa0]">Accounts prioritized by algorithmic churn probability</p>
+              </div>
+              <button className="view-all">View All →</button>
+           </div>
+           <div className="overflow-x-auto">
+              <table className="w-full">
+                 <thead>
+                    <tr>
+                       <th>Customer & Plan</th>
+                       <th>MRR Impact</th>
+                       <th>Risk Score</th>
+                       <th>Primary AI Diagnosis</th>
+                       <th>Last Active</th>
+                       <th>Auto-Action</th>
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-[#6b7fa0]/10 text-sm">
+                    {mockCustomers.map((row, i) => (
+                      <tr key={i} className="group hover:bg-[#d4902a]/[0.04] transition-colors cursor-pointer" onClick={() => setSelectedCampaign(row)}>
+                         <td className="py-4">
+                            <span className="cname">{row.name}</span>
+                            <span className="cplan">{row.plan}</span>
+                         </td>
+                         <td className="py-4 font-display text-[16px] text-[#e8c57a]">${row.mrr.toLocaleString()}</td>
+                         <td className="py-4">
+                            <div className="risk-wrap">
+                               <div className="risk-bg"><div className="risk-fill" style={{ width: `${row.prob}%`, background: row.prob > 70 ? "linear-gradient(to right, #e87070, #c44040)" : "#4acc80" }}></div></div>
+                               <span className="risk-pct" style={{ color: row.prob > 70 ? "#e87070" : "#4acc80" }}>{row.prob}%</span>
+                            </div>
+                         </td>
+                         <td className="py-4 text-[#8899bb] text-[12.5px]">{row.reason}</td>
+                         <td className="py-4 text-[#6b7fa0] text-[12px]">{row.active}</td>
+                         <td className="py-4">
+                            {row.status !== "none" ? (
+                              <span className={`pill ${row.status.includes('email') ? 'email' : row.status.includes('disc') ? 'disc' : 'call'}`}>
+                                {row.status === 'founder_email' ? "✉ Founder Email" : row.status === 'discount_offer' ? "◇ 20% Discount" : "☏ Success Call"}
+                              </span>
+                            ) : <span className="pill stable">Stable</span>}
+                         </td>
+                      </tr>
                     ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: '#111827', borderColor: '#374151', color: '#fff', borderRadius: '12px' }}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle"/>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+                 </tbody>
+              </table>
+           </div>
         </div>
 
-        {/* Advanced Data Table */}
-        <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 overflow-hidden">
-          <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
-            <div>
-              <h2 className="text-xl font-bold text-white">Live Intelligence Feed</h2>
-              <p className="text-sm text-gray-400 mt-1">Accounts prioritized by algorithmic churn probability.</p>
-            </div>
-            <button className="text-sm text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1">
-              View All <ArrowRight size={16}/>
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-black/40 text-gray-400 text-xs uppercase tracking-wider">
-                  <th className="px-6 py-4 font-medium">Customer & Plan</th>
-                  <th className="px-6 py-4 font-medium">MRR Impact</th>
-                  <th className="px-6 py-4 font-medium">Risk Score</th>
-                  <th className="px-6 py-4 font-medium hidden md:table-cell">Primary AI Diagnosis</th>
-                  <th className="px-6 py-4 font-medium hidden lg:table-cell">Last Active</th>
-                  <th className="px-6 py-4 font-medium">Auto-Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-sm">
-                {mockCustomers.map((row) => (
-                  <tr key={row.id} className="hover:bg-white/[0.02] transition-colors group cursor-pointer">
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-gray-200">{row.name}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{row.plan}</div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-300 font-medium">${row.mrr.toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${row.prob > 70 ? 'bg-red-500' : row.prob > 40 ? 'bg-amber-500' : 'bg-green-500'}`} 
-                            style={{ width: `${row.prob}%` }}
-                          />
-                        </div>
-                        <span className={`font-semibold ${row.prob > 70 ? 'text-red-400' : row.prob > 40 ? 'text-amber-400' : 'text-green-400'}`}>
-                          {row.prob}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 hidden md:table-cell">{row.reason}</td>
-                    <td className="px-6 py-4 text-gray-500 hidden lg:table-cell">{row.active}</td>
-                    <td className="px-6 py-4">
-                      {row.status !== "none" ? (
-                        <button 
-                          onClick={() => setSelectedCampaign(row)}
-                          className="flex items-center gap-2 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
-                        >
-                          {getActionBadge(row.status)}
-                        </button>
-                      ) : (
-                        <span className="text-gray-600 italic text-xs">Stable</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="footer-div mt-20">
+           <p>"In the silence between signals — there is intelligence."</p>
         </div>
+      </section>
 
-      </div>
-
-      {/* Modal for Viewing Campaigns */}
+      {/* Campaign Detail Modal */}
       <AnimatePresence>
         {selectedCampaign && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setSelectedCampaign(null)}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center p-6 border-b border-white/5 bg-black/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><BrainCircuit size={20} /></div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">AI Generated Campaign</h3>
-                    <p className="text-xs text-gray-400">Target: {selectedCampaign.name} | Strategy: {selectedCampaign.status.replace('_', ' ').toUpperCase()}</p>
-                  </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-[#080d1a]/80 backdrop-blur-sm" onClick={() => setSelectedCampaign(null)}>
+             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-[#0d1526] border border-[#d4902a]/20 rounded-2xl p-8 max-w-xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-start mb-6">
+                   <div>
+                      <h3 className="hero-title-font text-2xl text-[#f0e8d8]">AI Intelligence Memo</h3>
+                      <p className="text-xs text-[#6b7fa0] mt-1 tracking-widest uppercase">Strategy for {selectedCampaign.name}</p>
+                   </div>
+                   <button onClick={() => setSelectedCampaign(null)} className="text-[#6b7fa0] hover:text-white"><X size={20} /></button>
                 </div>
-                <button onClick={() => setSelectedCampaign(null)} className="text-gray-500 hover:text-white"><X size={20} /></button>
-              </div>
-              <div className="p-6 space-y-4">
-                <div className="bg-black/30 rounded-xl p-4 border border-white/5 font-mono text-sm text-gray-300">
-                  <div className="mb-2 border-b border-white/10 pb-2">
-                    <span className="text-gray-500">To:</span> ceo@{selectedCampaign.name.toLowerCase().replace(' ', '')}.com<br/>
-                    <span className="text-gray-500">Subject:</span> Quick question about your workspace
-                  </div>
-                  <div className="whitespace-pre-wrap mt-4 text-gray-300">
-                    Hi there,{'\n\n'}
-                    I'm the founder of Synapse. I was reviewing some metrics today and noticed that your team's engagement with our premium features has dropped off over the last few weeks.{'\n\n'}
-                    I know how busy things can get, but I want to make sure you're getting the full ROI from your ${selectedCampaign.mrr.toLocaleString()}/mo plan. 
-                    {selectedCampaign.status === 'discount_offer' ? " As a token of goodwill, I've applied a 20% discount to your next billing cycle." : " Do you have 5 minutes next Tuesday for a quick success call so I can personally help optimize your workflow?"}{'\n\n'}
-                    Best,{'\n'}
-                    Founder, Synapse
-                  </div>
+                <div className="bg-black/40 rounded-xl p-5 border border-white/5 font-mono text-[13px] text-[#8899bb] mb-6">
+                   <div className="border-b border-white/10 pb-3 mb-4">
+                      <span className="text-gray-600">Subject:</span> Quick question about your workspace{'\n'}
+                      <span className="text-gray-600">Tone:</span> Empathic & Professional
+                   </div>
+                   Hi there,{'\n\n'}
+                   I'm the founder of Synapse. I was reviewing some metrics and noticed your team's engagement with our premium features has dropped.{'\n\n'}
+                   I want to ensure you're getting full ROI from your ${selectedCampaign.mrr} plan. 
+                   {selectedCampaign.status === 'discount_offer' ? " I've applied a 20% discount to your next cycle." : " Are you free Tuesday for a quick success call?"}{'\n\n'}
+                   Best,{'\n'}Synapse Team
                 </div>
-                <div className="flex justify-end gap-3 pt-4">
-                  <button onClick={() => setSelectedCampaign(null)} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white">Cancel</button>
-                  <button className="px-6 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/30 flex items-center gap-2">
-                    <Mail size={16} /> Deploy Campaign
-                  </button>
+                <div className="flex justify-end gap-3">
+                   <button onClick={() => setSelectedCampaign(null)} className="btn-synapse-ghost px-6 py-2 rounded-full text-xs">Dismiss</button>
+                   <button onClick={() => {alert("Campaign Deployed."); setSelectedCampaign(null)}} className="btn-synapse-primary px-6 py-2 rounded-full text-xs font-semibold">Deploy Intelligence</button>
                 </div>
-              </div>
-            </motion.div>
+             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

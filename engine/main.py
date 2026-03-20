@@ -63,6 +63,42 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
 
     return {"status": "success"}
 
+@app.post("/create-checkout-session")
+def create_checkout_session():
+    """
+    Creates a Stripe Checkout Session for the $499/mo Enterprise Plan.
+    This is the 'Gateway for Money' that allows you to monetize the site.
+    """
+    if not os.getenv("STRIPE_API_KEY"):
+        # Fallback for demo mode if no key is provided
+        return {"url": "https://stripe.com/demo-checkout"}
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': 'Synapse Enterprise AI Plan',
+                            'description': 'Full access to Churn Prediction & GPT-4o Retention Campaigns',
+                        },
+                        'unit_amount': 49900, # $499.00
+                        'recurring': {'interval': 'month'},
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription',
+            success_url='https://churn-retention-engine.vercel.app/?success=true',
+            cancel_url='https://churn-retention-engine.vercel.app/?canceled=true',
+        )
+        return {"url": checkout_session.url}
+    except Exception as e:
+        print(f"Stripe Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/train")
 def trigger_training(background_tasks: BackgroundTasks):
     """

@@ -58,7 +58,25 @@ If you are looking for a high-paying job, put this in your portfolio. Do not jus
 
 ---
 
-## 🌍 Part 4: How to Put It on the Internet (Deployment Guide)
+## 🏦 Part 4: How the "Money Gateway" Works (Stripe Integration)
+
+I have integrated a real **Stripe Checkout** system into your site. This is how you actually collect money from customers:
+
+1. **The Button:** On your new homepage, there is a "Subscribe Now ($499/mo)" button.
+2. **The Logic:** When a customer clicks it, the Frontend calls your Python API (`/create-checkout-session`).
+3. **The Secure Payment:** The Python API talks to Stripe and generates a secure payment link.
+4. **The Redirect:** The user is instantly sent to Stripe's official, high-security checkout page.
+5. **The Payout:** Once they pay, the money goes directly into your Stripe account, and they are sent back to your site.
+
+**To make this work with your real bank account:**
+1. Log in to your [Stripe Dashboard](https://dashboard.stripe.com/).
+2. Toggle "Test Mode" to **OFF** (Live Mode).
+3. Copy your **Live Secret Key**.
+4. Paste it into your Render.com environment variables as `STRIPE_API_KEY`.
+
+---
+
+## 🌍 Part 5: How to Put It on the Internet (Deployment Guide)
 
 Right now, the app only lives on your personal computer (`localhost`). To let paying customers use it, it needs to be "deployed" to the internet. 
 

@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python virtual environments
+venv/
+venv2/
+run_env/
+engine_env/
+engine_env2/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+.env.local
+
+# Next.js build output
+.next/
+out/
+
+# Logs
+npm_install_log.txt
+pip_install_log.txt
+install_log.txt
+
+# OS generated files
+.DS_Store
+Thumbs.db

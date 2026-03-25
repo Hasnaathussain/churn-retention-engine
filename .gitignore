@@ -24,6 +24,7 @@ out/
 npm_install_log.txt
 pip_install_log.txt
 install_log.txt
+engine/churn_model.json
 
 # OS generated files
 .DS_Store

@@ -8,8 +8,12 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000/v1}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_DEMO_VIDEO_URL=${NEXT_PUBLIC_DEMO_VIDEO_URL:-}
+      - NEXT_PUBLIC_ALLOW_DEMO_MODE=${NEXT_PUBLIC_ALLOW_DEMO_MODE:-true}
     depends_on:
       - engine
       - db
@@ -21,11 +25,24 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      - API_URL=${API_URL:-http://localhost:8000/v1}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      - ALLOW_DEMO_MODE=${ALLOW_DEMO_MODE:-true}
+      - DEMO_WORKSPACE_ID=${DEMO_WORKSPACE_ID:-demo-synapse}
+      - DEMO_WORKSPACE_NAME=${DEMO_WORKSPACE_NAME:-Synapse Demo Workspace}
       - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_PRICE_ID=${STRIPE_PRICE_ID}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - MIXPANEL_PROJECT_TOKEN=${MIXPANEL_PROJECT_TOKEN}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - INTERCOM_ACCESS_TOKEN=${INTERCOM_ACCESS_TOKEN}
+      - RESEND_API_KEY=${RESEND_API_KEY}
       - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_LIVE_ENABLED=${SUPABASE_LIVE_ENABLED:-false}
     depends_on:
       - db
 

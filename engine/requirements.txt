@@ -6,3 +6,4 @@ mixpanel
 supabase
 python-dotenv
 pydantic
+httpx

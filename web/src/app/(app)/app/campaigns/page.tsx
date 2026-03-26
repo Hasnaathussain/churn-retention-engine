@@ -2,36 +2,56 @@ import { CampaignBoard } from "@/components/campaign-board";
 import { createWorkspaceApi } from "@/lib/api";
 import { requireWorkspaceSession } from "@/lib/auth";
 
-export default async function CampaignsPage() {
+export default async function CampaignsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; account?: string }>;
+}) {
+  const { tab, account } = await searchParams;
   const session = await requireWorkspaceSession("/signin?next=/app/campaigns");
   const api = createWorkspaceApi(session);
-  const [accounts, summary] = await Promise.all([api.getAccounts(), api.getDashboardSummary()]);
+  const [accounts, summary, playbooks] = await Promise.all([
+    api.getAccounts(),
+    api.getDashboardSummary(),
+    api.getPlaybooks(),
+  ]);
+
+  const initialTab = tab === "playbooks" ? "playbooks" : "drafts";
 
   return (
     <main className="space-y-6">
-      <section className="surface-card p-6">
-        <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">Campaigns</p>
-        <h1 className="panel-title mt-2 text-3xl text-[#f5f2ea]">Draft, queue, and deploy the next intervention</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-[#a0abc1]">
-          Campaigns translate the score into real outreach. This board can sit on top of live
-          integrations or the seeded workspace without changing the UI contract.
+      <section className="section-shell px-6 py-6 sm:px-8">
+        <p className="eyebrow">Campaigns</p>
+        <h1 className="panel-title mt-3 text-4xl text-[color:var(--text-primary)]">
+          Draft, refine, and deploy the next intervention
+        </h1>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--text-secondary)]">
+          Campaign generation and playbook management now share one stronger surface, so the team
+          does not have to leave the action flow to manage repeatable motion.
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-4">
           {[
             ["Running", `${summary.campaignsRunning}`],
             ["High risk", `${summary.highRiskAccounts}`],
-            ["Saved", `${summary.retentionsSaved}`],
+            ["Playbooks", `${playbooks.length}`],
             ["Workspace", summary.workspaceName],
           ].map(([label, value]) => (
-            <div key={label} className="rounded-2xl border border-white/8 bg-white/4 p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">{label}</p>
-              <p className="hero-type mt-2 text-2xl text-[#f5f2ea]">{value}</p>
+            <div key={label} className="metric-tile">
+              <p className="metric-label">{label}</p>
+              <p className="mt-3 text-base font-semibold text-[color:var(--text-primary)]">{value}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <CampaignBoard session={session} accounts={accounts} campaigns={summary.spotlightCampaigns} />
+      <CampaignBoard
+        session={session}
+        accounts={accounts}
+        campaigns={summary.spotlightCampaigns}
+        playbooks={playbooks}
+        initialTab={initialTab}
+        initialAccountId={account}
+      />
     </main>
   );
 }

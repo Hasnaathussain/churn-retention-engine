@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Cormorant_Garamond, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -9,10 +9,10 @@ const displayFont = Cormorant_Garamond({
   display: "swap",
 });
 
-const bodyFont = DM_Sans({
+const bodyFont = Plus_Jakarta_Sans({
   variable: "--font-body",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -32,6 +32,25 @@ export const metadata: Metadata = {
     "Synapse is an AI churn retention platform for SaaS teams that need premium forecasting, campaign automation, and workspace intelligence.",
 };
 
+const themeInitScript = `
+(() => {
+  const key = "synapse-theme";
+  const root = document.documentElement;
+  const stored = window.localStorage.getItem(key);
+  const systemDark =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = stored === "dark" || stored === "light"
+    ? stored
+    : systemDark
+      ? "dark"
+      : "light";
+
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,8 +59,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="light"
+      suppressHydrationWarning
       className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full scroll-smooth antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

@@ -32,25 +32,31 @@ export function BillingPanel({ session }: { session: WorkspaceSession }) {
 
   return (
     <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-      <section className="surface-card p-5">
-        <div className="mb-4 flex items-start justify-between gap-4">
+      <section className="surface-card p-5 sm:p-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">Billing</p>
-            <h2 className="panel-title mt-2 text-2xl text-[#f5f2ea]">Workspace subscription</h2>
+            <p className="metric-label">Billing</p>
+            <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
+              Workspace subscription
+            </h2>
           </div>
-          <CreditCard className="h-5 w-5 text-[#f6c66f]" />
+          <CreditCard className="h-5 w-5 text-[color:var(--accent-strong)]" />
         </div>
-        <div className="rounded-3xl border border-white/8 bg-white/4 p-5">
-          <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">Current plan</p>
-          <p className="hero-type mt-3 text-4xl text-[#f5f2ea]">$499</p>
-          <p className="mt-2 text-sm text-[#a0abc1]">Growth plan with AI retention workflows and workspace controls.</p>
+
+        <div className="rounded-[1.6rem] border border-[color:var(--accent-soft-border)] bg-[color:var(--accent-soft)] p-5">
+          <p className="metric-label">Current plan</p>
+          <p className="hero-type mt-3 text-4xl text-[color:var(--text-primary)]">$499</p>
+          <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
+            Growth plan with AI retention workflows, operator tooling, and workspace controls.
+          </p>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={launchCheckout}
             disabled={loading !== null}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f6c66f] px-5 py-3 text-sm font-medium text-[#08101f] transition hover:-translate-y-0.5 hover:bg-[#f2b94e] disabled:cursor-not-allowed disabled:opacity-60"
+            className="pill-link pill-link-accent text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading === "checkout" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Checkout session
@@ -60,7 +66,7 @@ export function BillingPanel({ session }: { session: WorkspaceSession }) {
             type="button"
             onClick={openPortal}
             disabled={loading !== null}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/4 px-5 py-3 text-sm text-[#f5f2ea] transition hover:border-white/20 hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-60"
+            className="pill-link text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Billing portal
@@ -69,18 +75,23 @@ export function BillingPanel({ session }: { session: WorkspaceSession }) {
         </div>
       </section>
 
-      <section className="surface-card p-5">
-        <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">Workspace scope</p>
+      <section className="surface-card p-5 sm:p-6">
+        <p className="metric-label">Scope and access</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {[
             ["Owner only", "Billing, integrations, and security settings"],
-            ["Member safe", "Accounts, campaigns, and playbooks"],
+            ["Member safe", "Accounts, campaigns, and playbook actions"],
             ["Demo mode", "Seeded workspace preview without live auth"],
             ["Live mode", "Supabase-backed session and workspace context"],
           ].map(([title, description]) => (
-            <div key={title} className="rounded-2xl border border-white/8 bg-white/4 p-4">
-              <p className="text-sm text-[#f5f2ea]">{title}</p>
-              <p className="mt-2 text-sm leading-7 text-[#a0abc1]">{description}</p>
+            <div
+              key={title}
+              className="rounded-[1.2rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4"
+            >
+              <p className="text-sm font-semibold text-[color:var(--text-primary)]">{title}</p>
+              <p className="mt-2 text-sm leading-7 text-[color:var(--text-secondary)]">
+                {description}
+              </p>
             </div>
           ))}
         </div>

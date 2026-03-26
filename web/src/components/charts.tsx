@@ -25,43 +25,54 @@ type RiskPoint = {
   color: string;
 };
 
+const axisStyle = {
+  fontSize: 11,
+  stroke: "var(--text-soft)",
+};
+
+const tooltipStyle = {
+  background: "var(--tooltip-bg)",
+  border: "1px solid var(--tooltip-border)",
+  borderRadius: "16px",
+  color: "var(--text-primary)",
+  boxShadow: "var(--shadow-soft)",
+};
+
 export function RevenueTrendChart({ data }: { data: TrendPoint[] }) {
   return (
-    <div className="h-[260px] min-w-0">
+    <div className="h-[280px] min-w-0">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ left: 0, right: 10, top: 5, bottom: 0 }}>
+        <AreaChart data={data} margin={{ left: 0, right: 8, top: 6, bottom: 0 }}>
           <defs>
             <linearGradient id="mrrGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#5b8fe8" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#5b8fe8" stopOpacity={0.02} />
+              <stop offset="5%" stopColor="var(--chart-primary)" stopOpacity={0.32} />
+              <stop offset="95%" stopColor="var(--chart-primary)" stopOpacity={0.04} />
             </linearGradient>
             <linearGradient id="pressureGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#f28b82" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#f28b82" stopOpacity={0.02} />
+              <stop offset="5%" stopColor="var(--chart-secondary)" stopOpacity={0.28} />
+              <stop offset="95%" stopColor="var(--chart-secondary)" stopOpacity={0.03} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-          <XAxis dataKey="month" stroke="#8f9ab7" tickLine={false} axisLine={false} fontSize={11} />
+          <CartesianGrid stroke="var(--grid-line)" vertical={false} />
+          <XAxis dataKey="month" tickLine={false} axisLine={false} {...axisStyle} />
           <YAxis
-            stroke="#8f9ab7"
             tickLine={false}
             axisLine={false}
-            fontSize={11}
             tickFormatter={(value) => `$${Math.round(Number(value) / 1000)}k`}
+            {...axisStyle}
           />
-          <Tooltip
-            contentStyle={{
-              background: "#0a1120",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "16px",
-              color: "#f5f2ea",
-            }}
+          <Tooltip contentStyle={tooltipStyle} />
+          <Area
+            type="monotone"
+            dataKey="mrr"
+            stroke="var(--chart-primary)"
+            strokeWidth={2.2}
+            fill="url(#mrrGradient)"
           />
-          <Area type="monotone" dataKey="mrr" stroke="#5b8fe8" strokeWidth={2} fill="url(#mrrGradient)" />
           <Area
             type="monotone"
             dataKey="churnPressure"
-            stroke="#f28b82"
+            stroke="var(--chart-secondary)"
             strokeWidth={2}
             fill="url(#pressureGradient)"
           />
@@ -80,23 +91,44 @@ export function RiskDistributionChart({ data }: { data: RiskPoint[] }) {
             data={data}
             dataKey="value"
             nameKey="label"
-            innerRadius={56}
-            outerRadius={88}
+            innerRadius={58}
+            outerRadius={90}
             paddingAngle={4}
           >
             {data.map((segment) => (
               <Cell key={segment.label} fill={segment.color} />
             ))}
           </Pie>
-          <Tooltip
-            contentStyle={{
-              background: "#0a1120",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "16px",
-              color: "#f5f2ea",
-            }}
-          />
+          <Tooltip contentStyle={tooltipStyle} />
         </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function AccountTrendChart({ data }: { data: TrendPoint[] }) {
+  return (
+    <div className="h-[220px] min-w-0">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ left: 0, right: 8, top: 6, bottom: 0 }}>
+          <defs>
+            <linearGradient id="accountTrendGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--chart-primary)" stopOpacity={0.24} />
+              <stop offset="95%" stopColor="var(--chart-primary)" stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke="var(--grid-line)" vertical={false} />
+          <XAxis dataKey="month" tickLine={false} axisLine={false} {...axisStyle} />
+          <YAxis tickLine={false} axisLine={false} {...axisStyle} />
+          <Tooltip contentStyle={tooltipStyle} />
+          <Area
+            type="monotone"
+            dataKey="churnPressure"
+            stroke="var(--chart-primary)"
+            strokeWidth={2.2}
+            fill="url(#accountTrendGradient)"
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

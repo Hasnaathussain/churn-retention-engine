@@ -2,28 +2,40 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/8 bg-[#050816]/80">
-      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
-        <div className="space-y-4">
-          <p className="hero-type text-3xl text-[#f5f2ea]">Revenue survives when signals become action.</p>
-          <p className="max-w-2xl text-sm leading-7 text-[#a0abc1]">
-            Synapse turns billing, product usage, and support pressure into a premium
-            retention workspace for founders and customer success teams.
-          </p>
-        </div>
-        <div className="grid gap-4 text-sm text-[#a0abc1] sm:grid-cols-2">
-          <Link href="/product" className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3 transition hover:bg-white/8">
-            Product
-          </Link>
-          <Link href="/pricing" className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3 transition hover:bg-white/8">
-            Pricing
-          </Link>
-          <Link href="/docs" className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3 transition hover:bg-white/8">
-            Docs
-          </Link>
-          <Link href="/contact" className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3 transition hover:bg-white/8">
-            Contact
-          </Link>
+    <footer className="px-4 pb-6 pt-10 sm:px-6 lg:px-8">
+      <div className="page-shell">
+        <div className="section-shell grid gap-8 px-6 py-8 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+          <div className="space-y-4">
+            <p className="eyebrow">Synapse platform</p>
+            <p className="hero-type max-w-2xl text-4xl leading-[0.95] text-[color:var(--text-primary)]">
+              Revenue survives when the signal becomes a workflow.
+            </p>
+            <p className="max-w-2xl text-sm leading-7 text-[color:var(--text-secondary)]">
+              Synapse turns billing, product usage, and support pressure into a polished
+              retention workspace for founders, success teams, and operators.
+            </p>
+          </div>
+
+          <div className="grid gap-3 text-sm sm:grid-cols-2">
+            <Link href="/product" className="pill-link">
+              Product
+            </Link>
+            <Link href="/pricing" className="pill-link">
+              Pricing
+            </Link>
+            <Link href="/product#solutions" className="pill-link">
+              Solutions
+            </Link>
+            <Link href="/product#setup" className="pill-link">
+              Setup
+            </Link>
+            <Link href="/demo" className="pill-link">
+              Demo
+            </Link>
+            <Link href="/contact" className="pill-link">
+              Contact
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

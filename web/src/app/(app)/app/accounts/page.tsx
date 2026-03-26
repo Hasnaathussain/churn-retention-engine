@@ -10,12 +10,14 @@ export default async function AccountsPage() {
 
   return (
     <main className="space-y-6">
-      <section className="surface-card p-6">
-        <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">Accounts</p>
-        <h1 className="panel-title mt-2 text-3xl text-[#f5f2ea]">Prioritize the right customer at the right moment</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-[#a0abc1]">
-          The list below is workspace-aware and sorted around churn pressure so the CS team can
-          move quickly without hunting through a flat CRM export.
+      <section className="section-shell px-6 py-6 sm:px-8">
+        <p className="eyebrow">Accounts</p>
+        <h1 className="panel-title mt-3 text-4xl text-[color:var(--text-primary)]">
+          Prioritize the right customer at the right moment
+        </h1>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--text-secondary)]">
+          This queue is sorted around churn pressure, but the layout is dense enough to help a team
+          act instead of hopping between weak pages to gather context.
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-4">
           {[
@@ -24,23 +26,17 @@ export default async function AccountsPage() {
             ["Monitored", `${summary.activeAccounts}`],
             ["Saved", `${summary.retentionsSaved}`],
           ].map(([label, value]) => (
-            <div key={label} className="rounded-2xl border border-white/8 bg-white/4 p-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">{label}</p>
-              <p className="hero-type mt-2 text-2xl text-[#f5f2ea]">{value}</p>
+            <div key={label} className="metric-tile">
+              <p className="metric-label">{label}</p>
+              <p className="metric-value">{value}</p>
             </div>
           ))}
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link
-            href="/app/campaigns"
-            className="inline-flex items-center justify-center rounded-full bg-[#f6c66f] px-5 py-3 text-sm font-medium text-[#08101f]"
-          >
-            Open campaign board
+          <Link href="/app/campaigns" className="pill-link pill-link-accent text-sm">
+            Open campaign studio
           </Link>
-          <Link
-            href="/app/overview"
-            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/4 px-5 py-3 text-sm text-[#f5f2ea]"
-          >
+          <Link href="/app/overview" className="pill-link text-sm">
             Back to overview
           </Link>
         </div>

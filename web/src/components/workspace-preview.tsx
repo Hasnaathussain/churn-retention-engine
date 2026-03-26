@@ -1,17 +1,25 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BadgeCheck, ChevronRight, Sparkles, X } from "lucide-react";
-import type { DashboardSummary, Account } from "@/lib/types";
+import {
+  ArrowRight,
+  BadgeCheck,
+  ChevronRight,
+  Radar,
+  Sparkles,
+  Waves,
+} from "lucide-react";
+import type { Account, DashboardSummary, TimelineEvent } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { demoTimeline } from "@/lib/mock-data";
 
 const RevenueTrendChart = dynamic(
   () => import("@/components/charts").then((mod) => mod.RevenueTrendChart),
   {
     ssr: false,
-    loading: () => <div className="h-[260px] rounded-3xl border border-white/8 bg-white/4" />,
+    loading: () => <div className="h-[280px] rounded-[1.5rem] bg-[color:var(--surface-soft)]" />,
   }
 );
 
@@ -19,134 +27,152 @@ const RiskDistributionChart = dynamic(
   () => import("@/components/charts").then((mod) => mod.RiskDistributionChart),
   {
     ssr: false,
-    loading: () => <div className="h-[240px] rounded-3xl border border-white/8 bg-white/4" />,
+    loading: () => <div className="h-[240px] rounded-[1.5rem] bg-[color:var(--surface-soft)]" />,
   }
 );
 
 type WorkspacePreviewProps = {
   summary: DashboardSummary;
   accounts: Account[];
+  mode?: "hero" | "full";
+  timeline?: TimelineEvent[];
 };
 
 function riskColor(probability: number) {
-  if (probability >= 0.75) return "#f28b82";
-  if (probability >= 0.55) return "#f6c66f";
-  return "#8dd6a3";
+  if (probability >= 0.75) return "var(--danger)";
+  if (probability >= 0.55) return "var(--warning)";
+  return "var(--success)";
 }
 
-export function WorkspacePreview({ summary, accounts }: WorkspacePreviewProps) {
-  const [selected, setSelected] = useState<Account | null>(accounts[0] ?? null);
+export function WorkspacePreview({
+  summary,
+  accounts,
+  mode = "full",
+  timeline,
+}: WorkspacePreviewProps) {
+  const activeAccounts = accounts.length ? accounts : summary.featuredAccounts;
+  const [selectedId, setSelectedId] = useState(activeAccounts[0]?.id ?? "");
+
+  const selected = useMemo(
+    () => activeAccounts.find((account) => account.id === selectedId) ?? activeAccounts[0] ?? null,
+    [activeAccounts, selectedId]
+  );
+  const signalStream = timeline?.length ? timeline : demoTimeline;
+  const compact = mode === "hero";
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Monthly revenue" value={`$${summary.monthlyRevenue.toLocaleString()}`} note="workspace-wide" />
-        <MetricCard label="Revenue at risk" value={`$${summary.revenueAtRisk.toLocaleString()}`} note="next 30 days" tone="danger" />
-        <MetricCard label="Active accounts" value={`${summary.activeAccounts}`} note="monitored continuously" />
-        <MetricCard label="Health score" value={`${summary.healthScore}`} note="AI-assisted view" tone="success" />
+    <div className={cn("space-y-5", compact ? "" : "space-y-6")}>
+      <div className={cn("grid gap-3", compact ? "sm:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-2 xl:grid-cols-4")}>
+        <MetricCard label="Revenue at risk" value={`$${summary.revenueAtRisk.toLocaleString()}`} note="30-day exposure" tone="warning" />
+        <MetricCard label="Healthy accounts" value={`${summary.activeAccounts - summary.highRiskAccounts}`} note="stable momentum" tone="success" />
+        <MetricCard label="Interventions running" value={`${summary.campaignsRunning}`} note="live or queued actions" />
+        <MetricCard label="Retention score" value={`${summary.healthScore}`} note="workspace pulse" />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-        <section className="surface-card p-5">
-          <div className="mb-4 flex items-start justify-between gap-4">
+      <div className={cn("grid gap-5", compact ? "xl:grid-cols-[1.2fr_0.8fr]" : "xl:grid-cols-[1.2fr_0.8fr]")}>
+        <section className="surface-card p-5 sm:p-6">
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">Revenue velocity</p>
-              <h2 className="panel-title mt-2 text-2xl text-[#f5f2ea]">
-                MRR vs churn pressure
+              <p className="metric-label">Revenue signal</p>
+              <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
+                MRR and churn pressure in one view
               </h2>
             </div>
-            <div className="glass-chip text-xs text-[#f6c66f]">
+            <span className="glass-chip text-xs">
               <Sparkles className="h-4 w-4" />
-              Live analysis
-            </div>
+              Live-looking analysis
+            </span>
           </div>
           <RevenueTrendChart data={summary.trend} />
         </section>
 
-        <section className="surface-card p-5">
-          <div className="mb-4 flex items-start justify-between gap-4">
+        <section className="surface-card p-5 sm:p-6">
+          <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">
+              <p className="metric-label">Urgency mix</p>
+              <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
                 Risk distribution
-              </p>
-              <h2 className="panel-title mt-2 text-2xl text-[#f5f2ea]">
-                Accounts by urgency
               </h2>
             </div>
+            <Radar className="h-5 w-5 text-[color:var(--accent-strong)]" />
           </div>
           <RiskDistributionChart data={summary.riskBreakdown} />
           <div className="grid gap-2 sm:grid-cols-3">
             {summary.riskBreakdown.map((segment) => (
-              <div key={segment.label} className="rounded-2xl border border-white/8 bg-white/4 px-3 py-2">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">
-                  {segment.label}
+              <div
+                key={segment.label}
+                className="rounded-[1.2rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-3 py-3"
+              >
+                <p className="metric-label">{segment.label}</p>
+                <p className="mt-2 text-lg font-semibold text-[color:var(--text-primary)]">
+                  {segment.value}%
                 </p>
-                <p className="mt-1 text-lg text-[#f5f2ea]">{segment.value}%</p>
               </div>
             ))}
           </div>
         </section>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-        <section className="surface-card p-5">
-          <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="grid gap-5 xl:grid-cols-[1.08fr_0.92fr]">
+        <section className="surface-card p-5 sm:p-6">
+          <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">
-                Priority accounts
-              </p>
-              <h2 className="panel-title mt-2 text-2xl text-[#f5f2ea]">
-                Click into the highest-risk customers
+              <p className="metric-label">Priority queue</p>
+              <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
+                Accounts that deserve action first
               </h2>
             </div>
-            <div className="glass-chip text-xs text-[#8dd6a3]">
+            <span className="glass-chip text-xs">
               <BadgeCheck className="h-4 w-4" />
-              workspace ready
-            </div>
+              triaged
+            </span>
           </div>
 
           <div className="space-y-3">
-            {accounts.map((account) => {
+            {activeAccounts.map((account) => {
               const selectedAccount = selected?.id === account.id;
-              const fill = riskColor(account.churnProbability);
 
               return (
                 <button
                   key={account.id}
                   type="button"
-                  onClick={() => setSelected(account)}
+                  onClick={() => setSelectedId(account.id)}
                   className={cn(
-                    "grid w-full gap-3 rounded-2xl border px-4 py-4 text-left transition",
+                    "w-full rounded-[1.45rem] border px-4 py-4 text-left transition",
                     selectedAccount
-                      ? "border-white/16 bg-white/8"
-                      : "border-white/8 bg-white/4 hover:border-white/12 hover:bg-white/6"
+                      ? "border-[color:var(--accent-soft-border)] bg-[color:var(--surface)] shadow-[var(--shadow-soft)]"
+                      : "border-[color:var(--border)] bg-[color:var(--surface-soft)] hover:border-[color:var(--accent-soft-border)] hover:bg-[color:var(--surface)]"
                   )}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="panel-title text-lg text-[#f5f2ea]">{account.name}</p>
-                      <p className="text-sm text-[#8f9ab7]">
-                        {account.plan} • {account.owner} • {account.lastActive}
+                      <p className="panel-title text-xl text-[color:var(--text-primary)]">
+                        {account.name}
+                      </p>
+                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
+                        {account.plan} / {account.owner} / {account.lastActive}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-[#f6c66f]">${account.mrr.toLocaleString()}</p>
-                      <p className="text-xs uppercase tracking-[0.2em] text-[#8f9ab7]">
+                      <p className="text-sm font-semibold text-[color:var(--accent-strong)]">
+                        ${account.mrr.toLocaleString()}
+                      </p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[color:var(--text-soft)]">
                         {Math.round(account.churnProbability * 100)}% risk
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/8">
+                  <div className="mt-4 flex items-center gap-3">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-[color:var(--surface-contrast)]">
                       <div
                         className="h-full rounded-full"
                         style={{
                           width: `${Math.round(account.churnProbability * 100)}%`,
-                          background: fill,
+                          background: riskColor(account.churnProbability),
                         }}
                       />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-[#8f9ab7]" />
+                    <ChevronRight className="h-4 w-4 text-[color:var(--text-soft)]" />
                   </div>
                 </button>
               );
@@ -154,141 +180,156 @@ export function WorkspacePreview({ summary, accounts }: WorkspacePreviewProps) {
           </div>
         </section>
 
-        <section className="surface-card p-5">
+        <section className="surface-card p-5 sm:p-6">
           {selected ? (
             <motion.div
               key={selected.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
               className="space-y-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">
-                    Account detail
-                  </p>
-                  <h3 className="panel-title mt-2 text-3xl text-[#f5f2ea]">
+                  <p className="metric-label">Account insight</p>
+                  <h3 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
                     {selected.name}
                   </h3>
+                  <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
+                    {selected.primaryRisk}
+                  </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSelected(null)}
-                  className="rounded-full border border-white/8 bg-white/4 p-2 text-[#f5f2ea] transition hover:bg-white/8"
-                  aria-label="Close account detail"
+                <div
+                  className="rounded-[1.4rem] border px-4 py-3 text-right"
+                  style={{
+                    borderColor: "var(--accent-soft-border)",
+                    background: "var(--accent-soft)",
+                  }}
                 >
-                  <X className="h-4 w-4" />
-                </button>
+                  <p className="metric-label">Risk</p>
+                  <p className="mt-2 text-3xl font-semibold text-[color:var(--text-primary)]">
+                    {Math.round(selected.churnProbability * 100)}%
+                  </p>
+                </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 {selected.drivers.map((driver) => (
-                  <div key={driver.label} className="rounded-2xl border border-white/8 bg-white/4 p-4">
-                    <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">
-                      {driver.label}
-                    </p>
-                    <p className="mt-2 text-sm text-[#f5f2ea]">{driver.value}</p>
+                  <div
+                    key={driver.label}
+                    className="rounded-[1.2rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4"
+                  >
+                    <p className="metric-label">{driver.label}</p>
+                    <p className="mt-2 text-sm text-[color:var(--text-primary)]">{driver.value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-3xl border border-white/8 bg-[#09101f] p-5">
+              <div className="rounded-[1.5rem] border border-[color:var(--accent-soft-border)] bg-[color:var(--accent-soft)] p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">
-                      Recommended action
+                    <p className="metric-label">Recommended move</p>
+                    <p className="mt-2 text-lg font-semibold text-[color:var(--text-primary)]">
+                      {selected.recommendedAction}
                     </p>
-                    <p className="mt-2 text-lg text-[#f5f2ea]">{selected.recommendedAction}</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-[#f6c66f]" />
+                  <ArrowRight className="h-5 w-5 text-[color:var(--accent-strong)]" />
                 </div>
-                <p className="mt-3 text-sm leading-7 text-[#a0abc1]">{selected.primaryRisk}</p>
+                <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
+                  Owner {selected.owner} should lead here, because the risk is concentrated in
+                  engagement and billing momentum rather than a single isolated signal.
+                </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/8 bg-white/4 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">Last login</p>
-                  <p className="mt-2 text-sm text-[#f5f2ea]">{selected.lastActive}</p>
+              {!compact ? (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <InfoTile label="Support load" value={`${selected.supportTickets} open`} />
+                  <InfoTile label="Usage rhythm" value={`${selected.usageFrequency} sessions / wk`} />
+                  <InfoTile label="Last login" value={`${selected.lastLoginDaysAgo} days ago`} />
                 </div>
-                <div className="rounded-2xl border border-white/8 bg-white/4 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">Support tickets</p>
-                  <p className="mt-2 text-sm text-[#f5f2ea]">{selected.supportTickets} open</p>
-                </div>
-              </div>
+              ) : null}
             </motion.div>
           ) : null}
         </section>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="surface-card p-5">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">
-                Campaign queue
-              </p>
-              <h2 className="panel-title mt-2 text-2xl text-[#f5f2ea]">
-                Drafts and deployed actions
-              </h2>
+      {!compact ? (
+        <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+          <section className="surface-card p-5 sm:p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="metric-label">Playbook pulse</p>
+                <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
+                  Repeatable motions with visible outcomes
+                </h2>
+              </div>
+              <Waves className="h-5 w-5 text-[color:var(--accent-strong)]" />
             </div>
-          </div>
-          <div className="space-y-3">
-            {summary.spotlightCampaigns.map((campaign) => (
-              <div key={campaign.id} className="rounded-2xl border border-white/8 bg-white/4 p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-[#f5f2ea]">{campaign.subject}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">
-                      {campaign.channel} • {campaign.status}
-                    </p>
+            <div className="space-y-3">
+              {summary.playbooks.map((playbook) => (
+                <div
+                  key={playbook.id}
+                  className="rounded-[1.3rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                        {playbook.name}
+                      </p>
+                      <p className="mt-2 text-sm leading-7 text-[color:var(--text-secondary)]">
+                        {playbook.action}
+                      </p>
+                    </div>
+                    <span className="glass-chip text-xs">{playbook.status}</span>
                   </div>
-                  <p className="text-sm text-[#f6c66f]">{campaign.roiEstimate}</p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <InfoTile label="Trigger" value={playbook.trigger} />
+                    <InfoTile label="Audience" value={playbook.audience} />
+                    <InfoTile label="Success rate" value={`${Math.round(playbook.successRate * 100)}%`} />
+                  </div>
                 </div>
-                <p className="mt-3 text-sm leading-7 text-[#a0abc1]">{campaign.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
 
-        <section className="surface-card p-5">
-          <div className="mb-4">
-            <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">
-              Integration health
-            </p>
-            <h2 className="panel-title mt-2 text-2xl text-[#f5f2ea]">
-              Connected providers
-            </h2>
-          </div>
-          <div className="space-y-3">
-            {summary.integrations.map((integration) => (
-              <div key={integration.provider} className="rounded-2xl border border-white/8 bg-white/4 p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-[#f5f2ea]">{integration.displayName}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-[#8f9ab7]">
-                      {integration.mode} • {integration.credentialState}
-                    </p>
-                  </div>
-                  <span
-                    className={cn(
-                      "rounded-full px-3 py-1 text-xs",
-                      integration.connected && integration.healthy
-                        ? "bg-[#8dd6a3]/15 text-[#8dd6a3]"
-                        : "bg-[#f28b82]/15 text-[#f28b82]"
-                    )}
-                  >
-                    {integration.connected && integration.healthy ? "Healthy" : "Needs attention"}
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-7 text-[#a0abc1]">
-                  {integration.description}
-                </p>
+          <section className="surface-card p-5 sm:p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="metric-label">Signal stream</p>
+                <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
+                  Activity that explains the score
+                </h2>
               </div>
-            ))}
-          </div>
-        </section>
-      </div>
+              <span className="glass-chip text-xs">{summary.integrations.length} providers</span>
+            </div>
+
+            <div className="space-y-3">
+              {signalStream.slice(0, 4).map((event) => (
+                <div
+                  key={event.id}
+                  className="rounded-[1.3rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                        {event.title}
+                      </p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[color:var(--text-soft)]">
+                        {event.channel} / {event.timestamp}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[color:var(--surface-contrast)] px-3 py-1 text-xs text-[color:var(--text-secondary)]">
+                      {event.kind}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm leading-7 text-[color:var(--text-secondary)]">
+                    {event.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -302,24 +343,33 @@ function MetricCard({
   label: string;
   value: string;
   note: string;
-  tone?: "danger" | "success";
+  tone?: "warning" | "success";
 }) {
   return (
-    <div className="rounded-3xl border border-white/8 bg-white/4 p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-[#8f9ab7]">{label}</p>
+    <div className="metric-tile">
+      <p className="metric-label">{label}</p>
       <p
         className={cn(
-          "hero-type mt-3 text-3xl",
-          tone === "danger"
-            ? "text-[#f28b82]"
+          "metric-value",
+          tone === "warning"
+            ? "text-[color:var(--warning)]"
             : tone === "success"
-              ? "text-[#8dd6a3]"
-              : "text-[#f5f2ea]"
+              ? "text-[color:var(--success)]"
+              : "text-[color:var(--text-primary)]"
         )}
       >
         {value}
       </p>
-      <p className="mt-2 text-sm text-[#a0abc1]">{note}</p>
+      <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{note}</p>
+    </div>
+  );
+}
+
+function InfoTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1.2rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4">
+      <p className="metric-label">{label}</p>
+      <p className="mt-2 text-sm text-[color:var(--text-primary)]">{value}</p>
     </div>
   );
 }

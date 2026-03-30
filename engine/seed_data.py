@@ -328,8 +328,8 @@ def _base_timeline() -> dict[str, list[TimelineEvent]]:
 
 
 def create_demo_workspace(
-    workspace_id: str = "demo-synapse",
-    workspace_name: str = "Synapse Demo Workspace",
+    workspace_id: str = "org_demo_anchoryn",
+    workspace_name: str = "Anchoryn Launch Preview",
     mode: WorkspaceMode = "demo",
 ) -> WorkspaceState:
     workspace = Workspace(
@@ -338,7 +338,7 @@ def create_demo_workspace(
         plan="Growth",
         role="owner",
         mode=mode,
-        ownerEmail="founder@synapse.demo",
+        ownerEmail="founder@anchoryn.demo",
         subscriptionStatus="trialing" if mode == "demo" else "active",
     )
 

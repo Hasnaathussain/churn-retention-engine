@@ -24,17 +24,24 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
-    default: "Synapse",
-    template: "%s | Synapse",
+    default: "Anchoryn",
+    template: "%s | Anchoryn",
   },
   description:
-    "Synapse is an AI churn retention platform for SaaS teams that need premium forecasting, campaign automation, and workspace intelligence.",
+    "Anchoryn is an AI-powered churn retention platform for SaaS teams that need predictive risk scoring, retention automation, and revenue-focused operations.",
+  applicationName: "Anchoryn",
+  icons: {
+    icon: [{ url: "/brand/icon-light.svg", type: "image/svg+xml" }],
+    shortcut: ["/brand/icon-light.svg"],
+    apple: ["/brand/icon-light.svg"],
+  },
 };
 
 const themeInitScript = `
 (() => {
-  const key = "synapse-theme";
+  const key = "anchoryn-theme";
   const root = document.documentElement;
   const stored = window.localStorage.getItem(key);
   const systemDark =

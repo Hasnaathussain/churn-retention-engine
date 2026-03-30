@@ -13,11 +13,11 @@ from state import get_workspace_state, reset_workspace_state
 class ApiSmokeTests(TestCase):
     def setUp(self):
         self.client = TestClient(main.app)
-        reset_workspace_state("demo-synapse")
+        reset_workspace_state("org_demo_anchoryn")
         reset_workspace_state("billing-workspace")
         reset_workspace_state("webhook-workspace")
 
-    def _headers(self, workspace_id: str = "demo-synapse", role: str = "owner", mode: str = "demo"):
+    def _headers(self, workspace_id: str = "org_demo_anchoryn", role: str = "owner", mode: str = "demo"):
         return {
             "X-Workspace-ID": workspace_id,
             "X-Workspace-Name": f"{workspace_id} Workspace",
@@ -36,7 +36,7 @@ class ApiSmokeTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         body = response.json()
-        self.assertEqual(body["workspaceId"], "demo-synapse")
+        self.assertEqual(body["workspaceId"], "org_demo_anchoryn")
         self.assertGreaterEqual(len(body["featuredAccounts"]), 1)
 
         accounts = self.client.get("/v1/accounts", headers=self._headers("billing-workspace", mode="live"))

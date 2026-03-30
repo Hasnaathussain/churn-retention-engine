@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { MoonStar, SunMedium } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const STORAGE_KEY = "synapse-theme";
+const STORAGE_KEY = "anchoryn-theme";
 
 type Theme = "light" | "dark";
 

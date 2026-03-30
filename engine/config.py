@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_PREFIX = "/v1"
+PUBLIC_API_PREFIX = "/api/v1"
 OPENAPI_URL = "/api/openapi.json"
 DOCS_URL = "/api/docs"
 REDOC_URL = "/api/redoc"
@@ -42,6 +43,10 @@ def app_url() -> str:
             default="http://localhost:3000",
         )
     )
+
+
+def app_env() -> str:
+    return os.getenv("APP_ENV") or os.getenv("NODE_ENV") or "development"
 
 
 def frontend_url() -> str:
@@ -82,6 +87,26 @@ def stripe_price_id() -> str | None:
     return os.getenv("STRIPE_PRICE_ID") or None
 
 
+def auth_jwt_secret() -> str:
+    return os.getenv("AUTH_JWT_SECRET", "anchoryn-development-secret")
+
+
+def access_token_minutes() -> int:
+    return int(os.getenv("ACCESS_TOKEN_MINUTES", "15"))
+
+
+def refresh_token_days() -> int:
+    return int(os.getenv("REFRESH_TOKEN_DAYS", "7"))
+
+
+def remember_me_days() -> int:
+    return int(os.getenv("REMEMBER_ME_DAYS", "30"))
+
+
+def secure_cookies() -> bool:
+    return app_env() == "production"
+
+
 def openai_model() -> str:
     return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
@@ -103,11 +128,11 @@ def supabase_live_enabled() -> bool:
 
 
 def demo_workspace_id() -> str:
-    return os.getenv("DEMO_WORKSPACE_ID", "demo-synapse")
+    return os.getenv("DEMO_WORKSPACE_ID", "org_demo_anchoryn")
 
 
 def demo_workspace_name() -> str:
-    return os.getenv("DEMO_WORKSPACE_NAME", "Synapse Demo Workspace")
+    return os.getenv("DEMO_WORKSPACE_NAME", "Anchoryn Launch Preview")
 
 
 def supabase_url() -> str | None:

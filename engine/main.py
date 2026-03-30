@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import uvicorn
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 from fastapi import BackgroundTasks, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from api import process_stripe_webhook, router as v1_router
+from platform_api import router as public_api_router
 from config import API_PREFIX, DOCS_URL, OPENAPI_URL, REDOC_URL, app_url, cors_origins
 from database import db
 from dependencies import workspace_context_from_metadata
@@ -19,8 +21,8 @@ load_dotenv()
 
 
 app = FastAPI(
-    title="Synapse Churn Retention Engine",
-    version="2.0.0",
+    title="Anchoryn Retention Platform",
+    version="3.0.0",
     docs_url=DOCS_URL,
     redoc_url=REDOC_URL,
     openapi_url=OPENAPI_URL,
@@ -35,6 +37,22 @@ app.add_middleware(
 )
 
 app.include_router(v1_router)
+app.include_router(public_api_router)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    )
+    return response
 
 
 class CustomerData(BaseModel):
@@ -50,7 +68,7 @@ def _legacy_workspace_context() -> WorkspaceContext:
     return workspace_context_from_metadata(
         {
             "workspace_id": "legacy-demo",
-            "workspace_name": "Legacy Demo Workspace",
+            "workspace_name": "Anchoryn Legacy Preview",
         }
     )
 
@@ -59,7 +77,7 @@ def _legacy_workspace_context() -> WorkspaceContext:
 def root_health():
     return {
         "status": "healthy",
-        "service": "Synapse Churn Retention Engine",
+        "service": "Anchoryn Retention Platform",
         "apiPrefix": API_PREFIX,
         "docs": DOCS_URL,
         "frontend": app_url(),
@@ -69,6 +87,16 @@ def root_health():
 @app.get("/health")
 def health():
     return root_health()
+
+
+@app.get("/health/detailed")
+def detailed_health():
+    return {
+        "status": "ok",
+        "db": "memory-backed",
+        "cache": "in-process",
+        "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
 
 
 @app.post("/webhooks/stripe")

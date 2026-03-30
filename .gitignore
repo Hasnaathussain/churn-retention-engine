@@ -15,16 +15,25 @@ __pycache__/
 # Environment variables
 .env
 .env.local
+.env.*.local
+!.env.example
 
 # Next.js build output
 .next/
 out/
+dist/
+build/
+coverage/
 
 # Logs
 npm_install_log.txt
 pip_install_log.txt
 install_log.txt
 engine/churn_model.json
+*.log
+
+# Docker
+.docker/
 
 # OS generated files
 .DS_Store

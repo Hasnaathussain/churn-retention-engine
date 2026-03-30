@@ -3,7 +3,7 @@ import { createSupabaseRouteClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const nextPath = url.searchParams.get("next") ?? "/app/overview";
+  const nextPath = url.searchParams.get("next") ?? "/app/dashboard";
   const code = url.searchParams.get("code");
 
   const response = NextResponse.redirect(new URL(nextPath, url.origin));

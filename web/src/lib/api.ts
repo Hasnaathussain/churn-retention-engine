@@ -1,5 +1,4 @@
-import { buildApiUrl } from "@/lib/config";
-import { config } from "@/lib/config";
+import { buildWorkspaceApiUrl, config } from "@/lib/config";
 import {
   buildDemoCampaign,
   buildDemoSummary,
@@ -31,7 +30,7 @@ async function requestJson<T>(
   }
 
   try {
-    const response = await fetch(buildApiUrl(path), {
+    const response = await fetch(buildWorkspaceApiUrl(path), {
       cache: "no-store",
       ...init,
       headers: {
@@ -139,7 +138,7 @@ export function createWorkspaceApi(session?: WorkspaceSession) {
     async createPortalSession() {
       return requestJson<{ url: string }>(
         "/billing/portal-session",
-        { url: "/signin" },
+        { url: "/login" },
         activeSession,
         { method: "POST" }
       );

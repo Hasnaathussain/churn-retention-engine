@@ -1,92 +1,76 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Layers3, Sparkles, Waypoints } from "lucide-react";
 import { WorkspacePreview } from "@/components/workspace-preview";
-import { buildDemoSummary, demoAccounts } from "@/lib/mock-data";
-
-const proofPoints = [
-  { label: "Revenue at risk recovered", value: "$24.5k", note: "saved across this month's interventions" },
-  { label: "Signals scored daily", value: "128", note: "workspace accounts watched continuously" },
-  { label: "Operator response speed", value: "2.4x", note: "faster than flat CRM triage" },
-];
+import {
+  buildDemoSummary,
+  demoAccounts,
+  faqs,
+  featureHighlights,
+  marketingStats,
+  testimonials,
+  valuePillars,
+} from "@/lib/mock-data";
 
 const capabilityCards = [
   {
     icon: Layers3,
-    title: "One surface for the full picture",
+    title: "One command surface for churn prevention",
     description:
-      "Billing, usage, support pressure, AI drafts, and team next steps live in one visual system instead of five disconnected tabs.",
+      "Anchoryn keeps billing, product engagement, support noise, and intervention planning inside one coherent operating layer.",
   },
   {
     icon: Waypoints,
     title: "From signal to action without handoff friction",
     description:
-      "Every risk state resolves into a recommended move, a playbook, or a campaign draft that operators can push forward immediately.",
+      "Every risk state resolves into a next-best move, a playbook, or an outreach draft that operators can use immediately.",
   },
   {
     icon: BadgeCheck,
-    title: "Polished enough for founders, clear enough for operators",
+    title: "Premium enough for leadership, practical enough for operators",
     description:
       "The storytelling is board-ready, but the workflow still gives CS and RevOps teams the detail they need to act confidently.",
   },
 ];
 
-const workflow = [
-  "Detect the accounts where revenue movement, engagement decay, or support strain are starting to converge.",
-  "Diagnose the exact drivers with account detail, timelines, and confidence-backed recommendations.",
-  "Act with drafts, playbooks, and billing-aware follow-up without leaving the workspace shell.",
-];
-
 export default function HomePage() {
   return (
-    <main className="page-shell pb-20 pt-6 sm:pt-8">
+    <main className="page-shell space-y-8 pb-20 pt-6 sm:pt-8">
       <section className="section-shell animated-rise overflow-hidden px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
         <div className="grid items-start gap-8 lg:grid-cols-[0.88fr_1.12fr]">
           <div className="space-y-6">
             <div className="glass-chip text-xs">
               <Sparkles className="h-4 w-4" />
-              Light-luxe retention operating system
+              Anchoryn production launch
             </div>
             <div className="space-y-4">
               <h1 className="hero-type max-w-3xl text-5xl leading-[0.92] text-[color:var(--text-primary)] sm:text-6xl lg:text-7xl">
                 Make churn intelligence feel clear, premium, and immediately actionable.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
-                Synapse connects billing, product usage, and support pressure into a refined
-                workspace for founders and operators. You can see what is slipping, why it matters,
-                and what to do next without wading through ghost links or placeholder dashboards.
+                Anchoryn connects billing, product usage, support pressure, and AI recommendations
+                into a refined retention workspace. You can see what is slipping, why it matters,
+                and what to do next before the revenue line breaks.
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link href="/demo" className="pill-link pill-link-accent text-sm">
-                Open the demo workspace
+              <Link href="/signup" className="pill-link pill-link-accent text-sm">
+                Start free trial
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/product" className="pill-link text-sm">
-                Explore the product
+              <Link href="/demo" className="pill-link text-sm">
+                Open the launch preview
               </Link>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {proofPoints.map((item) => (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {marketingStats.map((item) => (
                 <div key={item.label} className="metric-tile">
                   <p className="metric-label">{item.label}</p>
                   <p className="metric-value">{item.value}</p>
                   <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{item.note}</p>
                 </div>
               ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-[color:var(--text-secondary)]">
-              <span className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-4 py-2">
-                Stripe-aware billing state
-              </span>
-              <span className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-4 py-2">
-                Demo and live workspace modes
-              </span>
-              <span className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-4 py-2">
-                AI campaigns and playbooks
-              </span>
             </div>
           </div>
 
@@ -100,7 +84,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 py-8 md:grid-cols-3">
+      <section className="grid gap-4 py-2 md:grid-cols-3">
         {capabilityCards.map((card) => {
           const Icon = card.icon;
 
@@ -122,26 +106,72 @@ export default function HomePage() {
 
       <section className="section-shell grid gap-8 px-6 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10">
         <div>
-          <p className="eyebrow">How the product moves</p>
+          <p className="eyebrow">How it works</p>
           <h2 className="panel-title mt-3 max-w-xl text-4xl leading-[0.96] text-[color:var(--text-primary)]">
-            Fewer surfaces, stronger workflows, and a cleaner story for every click.
+            Detect the risk, explain it clearly, and move before churn lands.
           </h2>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-[color:var(--text-secondary)]">
-            The redesign keeps the core product rich, but it trims the unnecessary route sprawl.
-            What remains is a set of pages that actually guide a user from signal to decision.
-          </p>
         </div>
         <div className="grid gap-3">
-          {workflow.map((step, index) => (
+          {valuePillars.map((step, index) => (
             <div
-              key={step}
+              key={step.title}
               className="rounded-[1.45rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-5 py-5"
             >
               <p className="metric-label">Step 0{index + 1}</p>
-              <p className="mt-3 text-base leading-8 text-[color:var(--text-primary)]">{step}</p>
+              <p className="mt-3 text-base font-semibold text-[color:var(--text-primary)]">
+                {step.title}
+              </p>
+              <p className="mt-2 text-sm leading-7 text-[color:var(--text-secondary)]">
+                {step.description}
+              </p>
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="section-shell px-6 py-8 sm:px-8 lg:px-10">
+        <p className="eyebrow">Feature highlights</p>
+        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {featureHighlights.map((item) => (
+            <div
+              key={item}
+              className="rounded-[1.35rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-4 py-4 text-sm text-[color:var(--text-primary)]"
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+        <article className="surface-card p-6">
+          <p className="eyebrow">Customer proof</p>
+          <div className="mt-4 space-y-4">
+            {testimonials.map((item) => (
+              <div key={item.author} className="rounded-[1.35rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4">
+                <p className="text-sm leading-7 text-[color:var(--text-primary)]">“{item.quote}”</p>
+                <p className="mt-3 text-sm font-semibold text-[color:var(--text-primary)]">
+                  {item.author}
+                </p>
+                <p className="text-sm text-[color:var(--text-secondary)]">
+                  {item.role} / {item.company}
+                </p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="surface-card p-6">
+          <p className="eyebrow">FAQ</p>
+          <div className="mt-4 space-y-4">
+            {faqs.map((item) => (
+              <div key={item.question} className="rounded-[1.35rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4">
+                <p className="text-sm font-semibold text-[color:var(--text-primary)]">{item.question}</p>
+                <p className="mt-2 text-sm leading-7 text-[color:var(--text-secondary)]">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </article>
       </section>
     </main>
   );

@@ -29,8 +29,8 @@ services:
       - API_URL=${API_URL:-http://localhost:8000/v1}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       - ALLOW_DEMO_MODE=${ALLOW_DEMO_MODE:-true}
-      - DEMO_WORKSPACE_ID=${DEMO_WORKSPACE_ID:-demo-synapse}
-      - DEMO_WORKSPACE_NAME=${DEMO_WORKSPACE_NAME:-Synapse Demo Workspace}
+      - DEMO_WORKSPACE_ID=${DEMO_WORKSPACE_ID:-org_demo_anchoryn}
+      - DEMO_WORKSPACE_NAME=${DEMO_WORKSPACE_NAME:-Anchoryn Launch Preview}
       - STRIPE_API_KEY=${STRIPE_API_KEY}
       - STRIPE_PRICE_ID=${STRIPE_PRICE_ID}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}

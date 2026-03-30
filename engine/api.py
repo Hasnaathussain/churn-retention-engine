@@ -89,7 +89,7 @@ def _metadata_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
 def health_check() -> dict[str, str]:
     return {
         "status": "healthy",
-        "service": "Synapse Churn Retention Engine",
+        "service": "Anchoryn Retention Platform",
     }
 
 

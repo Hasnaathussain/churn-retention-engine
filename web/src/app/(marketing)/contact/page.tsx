@@ -9,7 +9,7 @@ export default function ContactPage() {
           <div className="space-y-6">
             <div className="glass-chip text-xs">Contact</div>
             <h1 className="hero-type max-w-4xl text-5xl leading-[0.95] text-[color:var(--text-primary)] sm:text-6xl lg:text-7xl">
-              Talk to the team behind the retention workspace.
+              Talk to the team behind Anchoryn.
             </h1>
             <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
               Whether you want a demo, help with setup, or a roadmap conversation, the contact
@@ -19,8 +19,8 @@ export default function ContactPage() {
               <Link href="/demo" className="pill-link pill-link-accent text-sm">
                 Open demo
               </Link>
-              <Link href="/signin" className="pill-link text-sm">
-                Sign in
+              <Link href="/login" className="pill-link text-sm">
+                Log in
               </Link>
             </div>
           </div>

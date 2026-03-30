@@ -36,7 +36,7 @@ def get_workspace_context(
         demo_workspace_id() if allow_demo_mode() else "live-workspace"
     )
     workspace_name = x_workspace_name or (
-        demo_workspace_name() if allow_demo_mode() else "Synapse Workspace"
+        demo_workspace_name() if allow_demo_mode() else "Anchoryn Workspace"
     )
     mode = _normalize_mode(x_workspace_mode, workspace_id)
     if not x_workspace_id and not allow_demo_mode():

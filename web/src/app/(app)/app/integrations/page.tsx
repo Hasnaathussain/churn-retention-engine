@@ -2,9 +2,12 @@ import { createWorkspaceApi } from "@/lib/api";
 import { requireWorkspaceSession } from "@/lib/auth";
 
 export default async function IntegrationsPage() {
-  const session = await requireWorkspaceSession("/signin?next=/app/integrations");
+  const session = await requireWorkspaceSession("/login?next=/app/integrations");
   const api = createWorkspaceApi(session);
-  const integrations = await api.getIntegrations();
+  const [integrations, summary] = await Promise.all([
+    api.getIntegrations(),
+    api.getDashboardSummary(),
+  ]);
 
   return (
     <main className="space-y-6">
@@ -14,8 +17,8 @@ export default async function IntegrationsPage() {
           Keep every provider visible, healthy, and trusted
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--text-secondary)]">
-          This view is no longer a shallow status wrapper. It is where the team can confirm whether
-          the underlying billing, usage, AI, and support signals are safe to rely on.
+          This view is where the team can confirm whether billing, usage, AI, API, and outbound
+          delivery signals are healthy enough to trust.
         </p>
       </section>
 
@@ -65,6 +68,48 @@ export default async function IntegrationsPage() {
             </div>
           </article>
         ))}
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+        <article className="surface-card p-5 sm:p-6">
+          <p className="metric-label">API keys</p>
+          <div className="mt-4 space-y-3">
+            {summary.apiKeys?.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4"
+              >
+                <p className="text-sm font-semibold text-[color:var(--text-primary)]">{item.name}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[color:var(--text-soft)]">
+                  {item.prefix}
+                </p>
+                <p className="mt-3 text-sm text-[color:var(--text-secondary)]">
+                  Last used {item.lastUsedAt}
+                </p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="surface-card p-5 sm:p-6">
+          <p className="metric-label">Webhook destinations</p>
+          <div className="mt-4 space-y-3">
+            {summary.webhooks?.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4"
+              >
+                <p className="text-sm font-semibold text-[color:var(--text-primary)]">{item.url}</p>
+                <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
+                  {item.events.join(", ")}
+                </p>
+                <p className="mt-3 text-sm text-[color:var(--text-secondary)]">
+                  {item.status} / last triggered {item.lastTriggeredAt}
+                </p>
+              </div>
+            ))}
+          </div>
+        </article>
       </section>
     </main>
   );

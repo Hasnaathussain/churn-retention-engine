@@ -51,13 +51,13 @@ export function AccountTable({ accounts }: { accounts: Account[] }) {
       <section className="surface-card p-5 sm:p-6">
         <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="metric-label">Account workspace</p>
+            <p className="metric-label">Customer intelligence</p>
             <h2 className="panel-title mt-2 text-3xl text-[color:var(--text-primary)]">
-              Sort the queue by risk, owner, or intent
+              Sort the queue by risk, owner, or segment
             </h2>
           </div>
-          <Link href="/app/campaigns" className="pill-link text-sm">
-            Open campaign studio
+          <Link href="/app/playbooks" className="pill-link text-sm">
+            Open playbooks
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -70,7 +70,7 @@ export function AccountTable({ accounts }: { accounts: Account[] }) {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search account, owner, plan, or domain"
+                placeholder="Search customer, owner, plan, or domain"
                 className="w-full bg-transparent text-sm text-[color:var(--text-primary)] outline-none placeholder:text-[color:var(--text-soft)]"
               />
             </span>
@@ -212,17 +212,17 @@ export function AccountTable({ accounts }: { accounts: Account[] }) {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <Link
-                href={`/app/accounts/${selected.id}`}
+                href={`/app/customers/${selected.id}`}
                 className="pill-link pill-link-accent text-sm"
               >
-                Open account detail
+                Open customer detail
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href={`/app/campaigns?account=${selected.id}`}
+                href={`/app/playbooks?account=${selected.id}`}
                 className="pill-link text-sm"
               >
-                Draft campaign
+                Draft intervention
               </Link>
             </div>
           </div>

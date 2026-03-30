@@ -16,7 +16,7 @@ def get_workspace_state(
     if workspace_id not in WORKSPACE_STATE:
         WORKSPACE_STATE[workspace_id] = create_demo_workspace(
             workspace_id=workspace_id,
-            workspace_name=workspace_name or "Synapse Demo Workspace",
+            workspace_name=workspace_name or "Anchoryn Launch Preview",
             mode=mode,
         )
     else:

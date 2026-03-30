@@ -140,6 +140,8 @@ class RiskSegment(BaseModel):
 
 
 class DashboardSummary(BaseModel):
+    organizationId: str | None = None
+    organizationName: str | None = None
     workspaceId: str
     workspaceName: str
     role: WorkspaceRole

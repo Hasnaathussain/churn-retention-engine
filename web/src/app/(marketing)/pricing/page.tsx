@@ -8,19 +8,18 @@ export default function PricingPage() {
         <div className="space-y-6">
           <div className="glass-chip text-xs">Pricing</div>
           <h1 className="hero-type max-w-4xl text-5xl leading-[0.95] text-[color:var(--text-primary)] sm:text-6xl lg:text-7xl">
-            Premium pricing for a premium retention engine.
+            Pricing that maps to the actual depth of your retention motion.
           </h1>
           <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
-            Start with a seeded workspace, then graduate to live auth, billing, and integrations
-            as the team is ready. Every plan keeps the product cohesive instead of splitting
-            capability across half-finished pages.
+            Starter and Growth begin with a 14-day free trial. Scale unlocks full API and unlimited
+            automation. Enterprise adds SSO, white-label, and deployment flexibility.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/demo" className="pill-link pill-link-accent text-sm">
-              Try the seeded demo
+            <Link href="/signup" className="pill-link pill-link-accent text-sm">
+              Start free trial
             </Link>
-            <Link href="/signin" className="pill-link text-sm">
-              Sign in to the app
+            <Link href="/demo" className="pill-link text-sm">
+              Explore the preview
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -57,8 +56,12 @@ export default function PricingPage() {
                 ) : null}
               </div>
               <div className="mt-5 flex items-end gap-2">
-                <p className="hero-type text-4xl text-[color:var(--text-primary)]">{plan.price}</p>
-                <p className="pb-1 text-sm text-[color:var(--text-soft)]">{plan.cadence}</p>
+                <p className="hero-type text-4xl text-[color:var(--text-primary)]">
+                  {plan.priceMonthly === null ? "Custom" : `$${plan.priceMonthly}`}
+                </p>
+                <p className="pb-1 text-sm text-[color:var(--text-soft)]">
+                  {plan.priceMonthly === null ? "" : `/month`}
+                </p>
               </div>
               <ul className="mt-5 space-y-2 text-sm text-[color:var(--text-primary)]">
                 {plan.features.map((feature) => (

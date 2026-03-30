@@ -1,46 +1,29 @@
 import Link from "next/link";
 import { ArrowRight, Radar, Workflow } from "lucide-react";
+import { solutionCards } from "@/lib/mock-data";
 
 const architectureLayers = [
   {
     title: "Signal layer",
     description:
-      "Billing, usage, support, and account events flow into a single risk-aware lens instead of fragmented reporting.",
+      "Billing, usage, support, and customer events flow into a single risk-aware lens instead of fragmented reporting.",
   },
   {
     title: "Decision layer",
     description:
-      "Scoring remains explainable, workspace-aware, and consistent across demo and live modes so operators trust what they see.",
+      "Scoring stays explainable, organization-aware, and stable enough for teams to trust in daily operations.",
   },
   {
     title: "Action layer",
     description:
-      "Campaigns, playbooks, and follow-up motion live beside the score, so the product never stops at insight alone.",
-  },
-];
-
-const solutionRows = [
-  {
-    title: "For founders",
-    description:
-      "See at-risk revenue, retained revenue, and the accounts that deserve executive attention without relying on a stitched-together deck.",
-  },
-  {
-    title: "For customer success",
-    description:
-      "Work from a queue that already understands urgency, next-best move, timeline context, and outreach options.",
-  },
-  {
-    title: "For RevOps",
-    description:
-      "Keep sync state, credential health, automation readiness, and workspace control inside one operational surface.",
+      "Campaigns, playbooks, reports, and follow-up motion live beside the score, so the product never stops at insight alone.",
   },
 ];
 
 const setupSteps = [
-  "Connect the frontend to the `/v1` backend and choose whether the workspace starts in demo or live mode.",
-  "Configure Supabase auth, Stripe billing state, and provider keys without changing the frontend contract.",
-  "Open the workspace and move from overview to accounts, campaigns, integrations, and settings without route clutter.",
+  "Create the organization and verify the owner email.",
+  "Connect CSV, Stripe, Slack, or the REST API and choose thresholds.",
+  "Open the dashboard, triage customers, and deploy the first retention motion.",
 ];
 
 export default function ProductPage() {
@@ -51,20 +34,20 @@ export default function ProductPage() {
           <div className="space-y-5">
             <p className="eyebrow">Product architecture</p>
             <h1 className="hero-type max-w-3xl text-5xl leading-[0.94] text-[color:var(--text-primary)] sm:text-6xl lg:text-7xl">
-              A retention product built around detect, diagnose, and act.
+              A retention platform built around detect, explain, and act.
             </h1>
             <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
-              Synapse keeps the public website lean and the product workflow dense. That means a
+              Anchoryn keeps the public story clear and the product workflow dense. That means a
               cleaner path from first impression to daily retention work, without dead-end routes or
               repeated placeholder pages.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link href="/demo" className="pill-link pill-link-accent text-sm">
-                Open the demo
+                Open the preview
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/signin" className="pill-link text-sm">
-                Sign in to the app
+              <Link href="/login" className="pill-link text-sm">
+                Log in to the app
               </Link>
             </div>
           </div>
@@ -88,9 +71,9 @@ export default function ProductPage() {
       <section id="solutions" className="section-shell px-6 py-8 sm:px-8 lg:px-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="eyebrow">Solutions</p>
+            <p className="eyebrow">Use cases</p>
             <h2 className="panel-title mt-3 text-4xl text-[color:var(--text-primary)]">
-              Built for the people who actually own retention
+              Built for the teams that actually own retention
             </h2>
           </div>
           <span className="glass-chip text-xs">
@@ -99,7 +82,7 @@ export default function ProductPage() {
           </span>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {solutionRows.map((row) => (
+          {solutionCards.map((row) => (
             <article key={row.title} className="surface-card p-6">
               <h3 className="panel-title text-3xl text-[color:var(--text-primary)]">
                 {row.title}
@@ -122,7 +105,7 @@ export default function ProductPage() {
           </div>
           <span className="glass-chip text-xs">
             <Workflow className="h-4 w-4" />
-            demo and live ready
+            production launch path
           </span>
         </div>
         <div className="mt-6 grid gap-3">

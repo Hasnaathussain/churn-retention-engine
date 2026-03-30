@@ -125,6 +125,8 @@ def build_dashboard_summary(context: WorkspaceContext) -> DashboardSummary:
 
     if not accounts:
         return DashboardSummary(
+            organizationId=state.workspace.workspaceId,
+            organizationName=state.workspace.workspaceName,
             workspaceId=state.workspace.workspaceId,
             workspaceName=state.workspace.workspaceName,
             role=context.role,
@@ -195,6 +197,8 @@ def build_dashboard_summary(context: WorkspaceContext) -> DashboardSummary:
     spotlight_campaigns = list(state.campaigns.values())
 
     return DashboardSummary(
+        organizationId=state.workspace.workspaceId,
+        organizationName=state.workspace.workspaceName,
         workspaceId=state.workspace.workspaceId,
         workspaceName=state.workspace.workspaceName,
         role=context.role,
@@ -422,7 +426,7 @@ def create_checkout_session(context: WorkspaceContext) -> dict[str, str]:
                 "price_data": {
                     "currency": "usd",
                     "product_data": {
-                        "name": "Synapse Growth Plan",
+                        "name": "Anchoryn Growth Plan",
                         "description": "Workspace-based churn retention engine with AI campaigns.",
                     },
                     "unit_amount": 49900,

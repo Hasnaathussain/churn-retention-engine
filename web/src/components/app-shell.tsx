@@ -7,114 +7,159 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
-  Building2,
   ChevronDown,
   LayoutDashboard,
   LifeBuoy,
   LogOut,
-  Megaphone,
   Search,
-  Settings2,
   ShieldCheck,
-  Sparkles,
+  Users,
+  Workflow,
+  FileText,
+  BrainCircuit,
+  Building2,
+  CreditCard,
+  MonitorCheck,
   X,
 } from "lucide-react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/cn";
+import { buildPlatformApiUrl, config } from "@/lib/config";
 import type { WorkspaceSession } from "@/lib/types";
 import { demoTimeline } from "@/lib/mock-data";
-import { config } from "@/lib/config";
+import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   {
-    href: "/app/overview",
-    label: "Overview",
-    description: "Revenue, risk, and recent signals",
+    href: "/app/dashboard",
+    label: "Dashboard",
+    description: "Revenue, risk, and AI activity",
     icon: LayoutDashboard,
   },
   {
-    href: "/app/accounts",
-    label: "Accounts",
-    description: "Priority queues and account detail",
+    href: "/app/customers",
+    label: "Customers",
+    description: "Account list, segments, and detail views",
     icon: Building2,
   },
   {
-    href: "/app/campaigns",
-    label: "Campaigns",
-    description: "Drafts, playbooks, and deployments",
-    icon: Megaphone,
+    href: "/app/analysis",
+    label: "Analysis",
+    description: "Manual runs, cohorts, and explanations",
+    icon: BrainCircuit,
+  },
+  {
+    href: "/app/playbooks",
+    label: "Playbooks",
+    description: "Automations, campaigns, and interventions",
+    icon: Workflow,
+  },
+  {
+    href: "/app/reports",
+    label: "Reports",
+    description: "Scheduled exports and executive summaries",
+    icon: FileText,
   },
   {
     href: "/app/integrations",
     label: "Integrations",
-    description: "Provider health and sync state",
+    description: "Provider health, API keys, and webhooks",
     icon: ShieldCheck,
   },
   {
-    href: "/app/settings",
-    label: "Settings",
-    description: "Workspace, billing, and preferences",
-    icon: Settings2,
+    href: "/app/team",
+    label: "Team",
+    description: "Members, invitations, and roles",
+    icon: Users,
   },
 ];
 
 const utilityLinks = [
   {
-    href: "/app/campaigns?tab=playbooks",
-    label: "Playbooks",
-    note: "Open automation playbooks",
+    href: "/app/account",
+    label: "Account settings",
+    note: "Profile, password, and preferences",
   },
   {
-    href: "/app/settings?tab=billing",
+    href: "/app/billing",
     label: "Billing",
-    note: "Manage plan and portal access",
+    note: "Plans, invoices, and usage",
   },
   {
-    href: "/contact",
-    label: "Support",
-    note: "Reach the team",
+    href: "/app/sessions",
+    label: "Sessions",
+    note: "Device activity and revocation",
   },
 ];
 
 const pageIntros: Record<string, { eyebrow: string; title: string; summary: string }> = {
-  "/app/overview": {
-    eyebrow: "Command center",
-    title: "Overview",
-    summary: "See revenue movement, at-risk accounts, and the operational pulse in one place.",
+  "/app/dashboard": {
+    eyebrow: "Retention command",
+    title: "Dashboard",
+    summary: "Track churn pressure, revenue exposure, and the actions the team should take next.",
   },
-  "/app/accounts": {
-    eyebrow: "Execution queue",
-    title: "Accounts",
-    summary: "Filter the list, preview risk context, and jump into the right customer without friction.",
+  "/app/customers": {
+    eyebrow: "Customer intelligence",
+    title: "Customers",
+    summary: "Sort the queue by risk, segment, revenue, or recent activity without losing detail.",
   },
-  "/app/campaigns": {
-    eyebrow: "Action studio",
-    title: "Campaigns",
-    summary: "Generate retention moves, refine playbooks, and deploy outreach from a single surface.",
+  "/app/analysis": {
+    eyebrow: "Prediction engine",
+    title: "AI analysis",
+    summary: "Run manual predictions, inspect explanation quality, and compare cohorts over time.",
+  },
+  "/app/playbooks": {
+    eyebrow: "Automation studio",
+    title: "Playbooks",
+    summary: "Draft campaigns, manage repeatable interventions, and watch conversion performance.",
+  },
+  "/app/reports": {
+    eyebrow: "Executive reporting",
+    title: "Reports",
+    summary: "Package churn summaries, cohort heatmaps, and revenue-impact views for stakeholders.",
   },
   "/app/integrations": {
-    eyebrow: "Signal health",
+    eyebrow: "System signal health",
     title: "Integrations",
-    summary: "Keep connectors, credentials, and sync confidence visible for the whole workspace.",
+    summary: "Keep providers, webhooks, API keys, and sync confidence visible across the workspace.",
   },
-  "/app/settings": {
-    eyebrow: "Workspace control",
-    title: "Settings",
-    summary: "Manage workspace identity, billing, members, and notification preferences cleanly.",
+  "/app/team": {
+    eyebrow: "Organization access",
+    title: "Team",
+    summary: "Invite members, adjust roles, and manage the human side of the workspace safely.",
+  },
+  "/app/account": {
+    eyebrow: "Personal settings",
+    title: "Account",
+    summary: "Manage profile details, alert preferences, and password/security choices.",
+  },
+  "/app/billing": {
+    eyebrow: "Subscription control",
+    title: "Billing",
+    summary: "Review plan usage, invoices, cards on file, and upgrade options before limits bite.",
+  },
+  "/app/admin": {
+    eyebrow: "Internal control",
+    title: "Admin",
+    summary: "Monitor global usage, feature flags, system health, and operator announcements.",
+  },
+  "/app/sessions": {
+    eyebrow: "Session security",
+    title: "Sessions",
+    summary: "Inspect active devices and revoke access when something looks unfamiliar.",
   },
 };
 
 function matchPage(pathname: string) {
-  if (pathname.startsWith("/app/accounts/")) {
+  if (pathname.startsWith("/app/customers/")) {
     return {
-      eyebrow: "Account 360",
-      title: "Account detail",
-      summary: "Read the drivers, timeline, and recommended move before you act.",
+      eyebrow: "Customer 360",
+      title: "Customer detail",
+      summary: "Read the risk explanation, timeline, playbook history, and recommended outreach in one view.",
     };
   }
 
-  return pageIntros[pathname] ?? pageIntros["/app/overview"];
+  return pageIntros[pathname] ?? pageIntros["/app/dashboard"];
 }
 
 export function AppShell({
@@ -149,16 +194,21 @@ export function AppShell({
     setSigningOut(true);
 
     try {
-      if (session.mode === "live" && config.supabaseUrl && config.supabaseAnonKey) {
-        const supabase = createSupabaseBrowserClient();
-        await supabase.auth.signOut();
+      if (session.mode === "live" && config.apiBaseUrl) {
+        await fetch(buildPlatformApiUrl("/auth/logout"), {
+          method: "POST",
+          credentials: "include",
+        });
       }
+    } catch {
+      // Fall back to client-side cookie clearing route.
     } finally {
-      window.location.href = "/signin";
+      window.location.href = "/auth/logout?next=/login";
     }
   }
 
   const intro = useMemo(() => matchPage(pathname), [pathname]);
+  const showAdmin = session.role === "owner" || session.role === "admin";
 
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
@@ -168,35 +218,22 @@ export function AppShell({
 
       <div className="mx-auto grid min-h-screen max-w-[1600px] gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="glass-panel-strong flex flex-col gap-5 rounded-[2rem] p-5 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]">
-          <Link
-            href="/app/overview"
-            className="flex items-center gap-3 rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-4 py-4"
-          >
-            <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[color:var(--accent-soft-border)] bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="hero-type truncate text-2xl text-[color:var(--text-primary)]">
-                Synapse
-              </p>
-              <p className="truncate text-[0.7rem] uppercase tracking-[0.24em] text-[color:var(--text-soft)]">
-                Retention operating layer
-              </p>
-            </div>
-          </Link>
+          <div className="rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] px-4 py-4">
+            <BrandLogo href="/app/dashboard" />
+          </div>
 
           <div className="rounded-[1.6rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4">
-            <p className="metric-label">Active workspace</p>
+            <p className="metric-label">Active organization</p>
             <button
               type="button"
               className="mt-3 flex w-full items-center justify-between rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-left"
             >
               <div>
                 <p className="text-sm font-medium text-[color:var(--text-primary)]">
-                  {session.workspaceName}
+                  {session.organizationName}
                 </p>
                 <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
-                  {session.mode === "demo" ? "Seeded workspace preview" : "Live authenticated workspace"}
+                  {session.plan} / {session.role} / {session.mode}
                 </p>
               </div>
               <ChevronDown className="h-4 w-4 text-[color:var(--text-soft)]" />
@@ -233,7 +270,7 @@ export function AppShell({
           </nav>
 
           <div className="rounded-[1.6rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4">
-            <p className="metric-label">Quick links</p>
+            <p className="metric-label">Workspace utilities</p>
             <div className="mt-3 grid gap-2">
               {utilityLinks.map((link) => (
                 <Link
@@ -247,12 +284,26 @@ export function AppShell({
                   </p>
                 </Link>
               ))}
+              {showAdmin ? (
+                <Link
+                  href="/app/admin"
+                  className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 transition hover:border-[color:var(--accent-soft-border)]"
+                >
+                  <p className="flex items-center gap-2 text-sm text-[color:var(--text-primary)]">
+                    <MonitorCheck className="h-4 w-4" />
+                    Admin console
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">
+                    Flags, health, and org-wide operations
+                  </p>
+                </Link>
+              ) : null}
             </div>
           </div>
 
           <div className="mt-auto grid gap-3">
             <Link href="/demo" className="pill-link pill-link-accent text-sm">
-              Reopen demo
+              View launch preview
             </Link>
             <Link href="/contact" className="pill-link text-sm">
               <LifeBuoy className="h-4 w-4" />
@@ -266,7 +317,7 @@ export function AppShell({
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-3xl">
                 <p className="eyebrow">
-                  {session.mode === "demo" ? `${intro.eyebrow} / demo` : intro.eyebrow}
+                  {session.mode === "demo" ? `${intro.eyebrow} / preview` : intro.eyebrow}
                 </p>
                 <h1 className="panel-title mt-2 text-4xl text-[color:var(--text-primary)]">
                   {intro.title}
@@ -289,6 +340,10 @@ export function AppShell({
                     Ctrl K
                   </span>
                 </button>
+                <Link href="/app/billing" className="pill-link text-sm">
+                  <CreditCard className="h-4 w-4" />
+                  Plan
+                </Link>
                 <button
                   type="button"
                   onClick={() => setNotificationsOpen(true)}
@@ -305,7 +360,7 @@ export function AppShell({
                   className="pill-link text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <LogOut className="h-4 w-4" />
-                  {signingOut ? "Signing out..." : session.mode === "demo" ? "Exit demo" : "Sign out"}
+                  {signingOut ? "Signing out..." : session.mode === "demo" ? "Exit preview" : "Sign out"}
                 </button>
               </div>
             </div>
@@ -335,7 +390,7 @@ export function AppShell({
                 <div>
                   <p className="metric-label">Quick search</p>
                   <h2 className="panel-title mt-2 text-2xl text-[color:var(--text-primary)]">
-                    Jump to the next retention move
+                    Jump across retention surfaces
                   </h2>
                 </div>
                 <button
@@ -388,7 +443,7 @@ export function AppShell({
                 <div>
                   <p className="metric-label">Notifications</p>
                   <h2 className="panel-title mt-2 text-2xl text-[color:var(--text-primary)]">
-                    Recent signals
+                    Recent risk signals
                   </h2>
                 </div>
                 <button

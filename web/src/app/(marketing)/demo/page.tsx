@@ -10,7 +10,7 @@ export default function DemoPage() {
           <div className="space-y-5">
             <div className="glass-chip text-xs">Seeded demo workspace</div>
             <h1 className="hero-type max-w-4xl text-5xl leading-[0.95] text-[color:var(--text-primary)] sm:text-6xl lg:text-7xl">
-              Walk through the product before connecting live data.
+              Walk through the product before you connect live data.
             </h1>
             <p className="max-w-2xl text-base leading-8 text-[color:var(--text-secondary)] sm:text-lg">
               This preview uses the seeded demo workspace and mirrors the same account, campaign,
@@ -18,11 +18,11 @@ export default function DemoPage() {
               coherent preview path rather than a disconnected mini-site.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/auth/demo?next=/app/overview" className="pill-link pill-link-accent text-sm">
+              <Link href="/auth/demo?next=/app/dashboard" className="pill-link pill-link-accent text-sm">
                 Open the demo app
               </Link>
-              <Link href="/signin" className="pill-link text-sm">
-                Sign in to the app
+              <Link href="/login" className="pill-link text-sm">
+                Log in to the app
               </Link>
               <Link href="/pricing" className="pill-link text-sm">
                 Compare plans
@@ -35,8 +35,8 @@ export default function DemoPage() {
             <div className="mt-4 grid gap-3">
               {[
                 "Workspace overview with risk trends and revenue at risk",
-                "Account drilldown with timeline, playbook, and campaign drafts",
-                "Integrations plus billing-aware settings in the protected shell",
+                "Customer drilldown with timeline, playbook, and campaign drafts",
+                "Integrations, billing, API keys, and webhook visibility in the protected shell",
               ].map((item) => (
                 <div
                   key={item}

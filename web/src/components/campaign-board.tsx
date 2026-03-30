@@ -112,7 +112,7 @@ export function CampaignBoard({
 
         <div className="rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-4">
           <label className="block space-y-2">
-            <span className="metric-label">Account</span>
+            <span className="metric-label">Customer</span>
             <select
               value={selectedAccountId}
               onChange={(event) => setSelectedAccountId(event.target.value)}
@@ -145,11 +145,11 @@ export function CampaignBoard({
               {loading === "generate" ? <Loader2 className="h-4 w-4 animate-spin" /> : <WandSparkles className="h-4 w-4" />}
               Generate campaign
             </button>
-            <Link
-              href={`/app/accounts/${selectedAccountId}`}
+              <Link
+              href={`/app/customers/${selectedAccountId}`}
               className="pill-link text-sm"
             >
-              Open account detail
+              Open customer detail
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -254,7 +254,7 @@ export function CampaignBoard({
                 href={`/app/accounts/${draft.accountId}`}
                 className="pill-link text-sm"
               >
-                Review account context
+                Review customer context
               </Link>
             </div>
           </>
